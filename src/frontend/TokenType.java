@@ -1,0 +1,24 @@
+package frontend;
+
+public enum TokenType {
+    IDENFR, INTCON,
+    STRCON, CHRCON,
+    MAINTK, CONSTTK,
+    INTTK, CHARTK,
+    BREAKTK, CONTINUETK,
+    IFTK, ELSETK,
+    NOT, AND, OR,
+    FORTK, GETINTTK,
+    GETCHARTK, PRINTFTK,
+    RETURNTK, PLUS,
+    MINU, MULT,
+    VOIDTK, DIV,
+    MOD, LSS,
+    LEQ, GRE,
+    GEQ, EQL,
+    NEQ, ASSIGN,
+    SEMICN, COMMA,
+    LPARENT, RPARENT,
+    LBRACK, RBRACK,
+    LBRACE, RBRACE
+}
