@@ -1,10 +1,15 @@
+import frontend.AST.Node;
 import frontend.Lexer;
+import frontend.Error;
+import frontend.Parser;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) {
-        Lexer lexer = new Lexer();
+        ArrayList<Error> errors = new ArrayList<>();
+        Lexer lexer = new Lexer(errors);
         String path = "testfile.txt";
         StringBuilder input = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -16,22 +21,31 @@ public class Compiler {
             e.printStackTrace();
         }
         lexer.lexerIn(input.toString());
-        if (lexer.hasError()) {
+        Parser parser = new Parser(lexer, errors);
+        Node root = parser.parse();
+        //重定向输出到lexer.txt
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("lexer.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        lexer.lexerOut();
+        if (parser.hasError()) {
             //重定向输出到error.txt
             try {
                 System.setOut(new PrintStream(new FileOutputStream("error.txt")));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            lexer.error();
+            parser.printErrors();
         } else {
-            //重定向输出到lexer.txt
+            //重定向输出到parser.txt
             try {
-                System.setOut(new PrintStream(new FileOutputStream("lexer.txt")));
+                System.setOut(new PrintStream(new FileOutputStream("parser.txt")));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            lexer.lexerOut();
+            root.print();
         }
 
     }

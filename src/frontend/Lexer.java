@@ -1,5 +1,8 @@
 package frontend;
 
+import frontend.Token.Token;
+import frontend.Token.TokenType;
+
 import java.util.ArrayList;
 
 public class Lexer {
@@ -8,11 +11,26 @@ public class Lexer {
     private int lineNum;
     private int index;
 
-    public Lexer() {
-        tokens = new ArrayList<>();
-        errors = new ArrayList<>();
-        lineNum = 1;
-        index = 0;
+    public Lexer(ArrayList<Error> errors) {
+        this.tokens = new ArrayList<>();
+        this.errors = errors;
+        this.lineNum = 1;
+        this.index = 0;
+    }
+
+    public ArrayList<Token> getTokens() {
+        return tokens;
+    }
+
+    public Token getToken(int index) {
+        if (index < 0 || index >= tokens.size()) {
+            return new Token(-1, TokenType.NULL, "NULL");
+        }
+        return tokens.get(index);
+    }
+
+    public int getTokensSize() {
+        return tokens.size();
     }
 
     public void error() {
@@ -99,6 +117,8 @@ public class Lexer {
                         tokens.add(new Token(lineNum, TokenType.AND, "&&"));
                         index++;
                     } else {
+                        tokens.add(new Token(lineNum, TokenType.AND, "&&"));
+                        index++;
                         errors.add(new Error(lineNum, "a"));
                     }
                     break;
@@ -107,6 +127,8 @@ public class Lexer {
                         tokens.add(new Token(lineNum, TokenType.OR, "||"));
                         index++;
                     } else {
+                        tokens.add(new Token(lineNum, TokenType.OR, "||"));
+                        index++;
                         errors.add(new Error(lineNum, "a"));
                     }
                     break;
@@ -174,6 +196,10 @@ public class Lexer {
                     sb1.append(input.charAt(index));
                     index++;
                     while (hasNext(input) && input.charAt(index) != '\'') {
+                        if (input.charAt(index) == '\\') {
+                            sb1.append(input.charAt(index));
+                            index++;
+                        }
                         sb1.append(input.charAt(index));
                         index++;
                     }
@@ -254,5 +280,7 @@ public class Lexer {
             index++;
         }
     }
+
+
 }
 

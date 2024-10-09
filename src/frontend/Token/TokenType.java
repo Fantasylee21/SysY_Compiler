@@ -1,4 +1,4 @@
-package frontend;
+package frontend.Token;
 
 public enum TokenType {
     IDENFR, INTCON,
@@ -20,5 +20,6 @@ public enum TokenType {
     SEMICN, COMMA,
     LPARENT, RPARENT,
     LBRACK, RBRACK,
-    LBRACE, RBRACE
+    LBRACE, RBRACE,
+    NULL
 }

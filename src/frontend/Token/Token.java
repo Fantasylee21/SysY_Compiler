@@ -1,4 +1,4 @@
-package frontend;
+package frontend.Token;
 
 public class Token {
     private final int lineNum;
