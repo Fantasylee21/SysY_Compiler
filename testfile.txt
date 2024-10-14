@@ -1,0 +1,25 @@
+void f0() {
+
+}
+
+void f1(int x) {
+    f0(2024);
+    f1();
+}
+
+void f2(int x, int y) {
+    f1(2024);
+    f2(2024, 2024);
+}
+char a;
+void f(char a) {
+
+}
+
+int main() {
+    f0();
+    int a;
+    f1();
+    f(+a);
+    return 0;
+}

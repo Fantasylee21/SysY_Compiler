@@ -1,5 +1,6 @@
 package frontend.AST.SyntaxComponent;
 
+import frontend.AST.ExpValueType;
 import frontend.AST.Node;
 import frontend.AST.SyntaxType;
 

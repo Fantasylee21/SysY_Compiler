@@ -1,15 +1,19 @@
+import frontend.*;
 import frontend.AST.Node;
-import frontend.Lexer;
-import frontend.Error;
-import frontend.Parser;
+import frontend.Error.Error;
+import frontend.Error.LexerErrors;
+import frontend.Error.ParserErrors;
+import frontend.Error.SymbolErrors;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class Compiler {
     public static void main(String[] args) {
-        ArrayList<Error> errors = new ArrayList<>();
-        Lexer lexer = new Lexer(errors);
+        //从小到大排序
+        TreeMap<Integer,String> errors = new TreeMap<>();
+
+        Lexer lexer = new Lexer();
         String path = "testfile.txt";
         StringBuilder input = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -21,7 +25,7 @@ public class Compiler {
             e.printStackTrace();
         }
         lexer.lexerIn(input.toString());
-        Parser parser = new Parser(lexer, errors);
+        Parser parser = new Parser(lexer);
         Node root = parser.parse();
         //重定向输出到lexer.txt
         try {
@@ -30,23 +34,41 @@ public class Compiler {
             e.printStackTrace();
         }
         lexer.lexerOut();
-        if (parser.hasError()) {
-            //重定向输出到error.txt
-            try {
-                System.setOut(new PrintStream(new FileOutputStream("error.txt")));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            parser.printErrors();
-        } else {
-            //重定向输出到parser.txt
-            try {
-                System.setOut(new PrintStream(new FileOutputStream("parser.txt")));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            root.print();
-        }
 
+        //重定向输出到parser.txt
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("parser.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        root.print();
+
+        //重定向输出到symbol.txt
+        root.checkErrors();
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("symbol.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        SymbolManager.getInstance().print();
+
+        //重定向输出到error.txt
+        for (Error error : LexerErrors.getInstance().getErrors()) {
+            errors.put(error.getLineNum(),error.getMessage());
+        }
+        for (Error error : ParserErrors.getInstance().getErrors()) {
+            errors.put(error.getLineNum(),error.getMessage());
+        }
+        for (Error error : SymbolErrors.getInstance().getErrors()) {
+            errors.put(error.getLineNum(),error.getMessage());
+        }
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("error.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (Integer key : errors.keySet()) {
+            System.out.println(key + " " + errors.get(key));
+        }
     }
 }

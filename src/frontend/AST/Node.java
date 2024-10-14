@@ -3,7 +3,7 @@ package frontend.AST;
 import java.util.ArrayList;
 
 public class Node {
-    private final int startLine;
+    protected final int startLine;
     private final int endLine;
     protected final SyntaxType type;
     protected final ArrayList<Node> children;
@@ -36,6 +36,22 @@ public class Node {
             child.print();
         }
         System.out.println("<" + type.toString() + ">");
+    }
+
+    public int calcValue() {
+        return 0;
+    }
+
+    public void checkErrors() {
+        if (children != null) {
+            for (Node child : children) {
+                child.checkErrors();
+            }
+        }
+    }
+
+    public ExpValueType getExpValueType() {
+        return ExpValueType.CONSTANT;
     }
 
 }

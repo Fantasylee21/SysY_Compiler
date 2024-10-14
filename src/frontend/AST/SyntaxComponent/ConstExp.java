@@ -10,4 +10,8 @@ public class ConstExp extends Node {
         super(startLine, endLine, type, children);
     }
 
+    @Override
+    public int calcValue() {
+        return children.get(0).calcValue();
+    }
 }

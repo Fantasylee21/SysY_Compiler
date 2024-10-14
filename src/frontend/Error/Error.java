@@ -1,4 +1,4 @@
-package frontend;
+package frontend.Error;
 
 public class Error {
     private final int lineNum;

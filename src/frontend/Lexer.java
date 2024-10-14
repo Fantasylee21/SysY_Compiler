@@ -1,5 +1,7 @@
 package frontend;
 
+import frontend.Error.Error;
+import frontend.Error.LexerErrors;
 import frontend.Token.Token;
 import frontend.Token.TokenType;
 
@@ -7,13 +9,11 @@ import java.util.ArrayList;
 
 public class Lexer {
     private final ArrayList<Token> tokens;
-    private final ArrayList<Error> errors;
     private int lineNum;
     private int index;
 
-    public Lexer(ArrayList<Error> errors) {
+    public Lexer() {
         this.tokens = new ArrayList<>();
-        this.errors = errors;
         this.lineNum = 1;
         this.index = 0;
     }
@@ -33,13 +33,6 @@ public class Lexer {
         return tokens.size();
     }
 
-    public void error() {
-        // 输出到error.txt
-        for (Error error : errors) {
-            System.out.println(error.getLineNum() + " " + error.getMessage());
-        }
-    }
-
     public void lexerOut() {
         // 输出到lexer.txt
         for (Token token : tokens) {
@@ -57,10 +50,6 @@ public class Lexer {
 
     public boolean isIdentifier(char c) {
         return isIdentifierNonDigit(c) || (c >= '0' && c <= '9');
-    }
-
-    public boolean hasError() {
-        return !errors.isEmpty();
     }
 
     public void lexerIn(String input) {
@@ -119,7 +108,7 @@ public class Lexer {
                     } else {
                         tokens.add(new Token(lineNum, TokenType.AND, "&&"));
                         index++;
-                        errors.add(new Error(lineNum, "a"));
+                        LexerErrors.getInstance().addError(lineNum, "a");
                     }
                     break;
                 case '|':
@@ -129,7 +118,7 @@ public class Lexer {
                     } else {
                         tokens.add(new Token(lineNum, TokenType.OR, "||"));
                         index++;
-                        errors.add(new Error(lineNum, "a"));
+                        LexerErrors.getInstance().addError(lineNum, "a");
                     }
                     break;
                 case '<':
