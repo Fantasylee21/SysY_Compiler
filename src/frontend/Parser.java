@@ -32,6 +32,11 @@ public class Parser {
         this.curLineNum = curToken.getLineNum();
     }
 
+    public void addMissedNode(ArrayList<Node> children, int curLineNum, TokenType type, String value) {
+        Node node = new TokenNode(curLineNum, curLineNum, SyntaxType.Token, null, new Token(curLineNum, type, value));
+        children.add(node);
+    }
+
     public Node parse() {
         return parseCompUnit();
     }
@@ -87,6 +92,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
             }
         } else {
             throw new RuntimeException("Expect '(' in MainFuncDef");
@@ -121,6 +127,7 @@ public class Parser {
             addTokenNode(children, curLineNum);
         } else {
             ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+            addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
         }
 
         int endLine = lexer.getToken(curTokenIndex - 1).getLineNum();
@@ -148,6 +155,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "k");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RBRACK, "]");
             }
         }
 
@@ -284,6 +292,7 @@ public class Parser {
                     addTokenNode(children, curLineNum);
                 } else {
                     ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                    addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
                 }
             } else {
                 throw new RuntimeException("Expect '(' in UnaryExp");
@@ -353,6 +362,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "k");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RBRACK, "]");
             }
         }
 
@@ -395,6 +405,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
             }
         } else if (curToken.getType() == TokenType.IDENFR) {
             node = parseLVal();
@@ -541,6 +552,7 @@ public class Parser {
             addTokenNode(children, curLineNum);
         } else {
             ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+            addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
         }
         int endLine = lexer.getToken(curTokenIndex - 1).getLineNum();
         return new ConstDecl(curLineNum, endLine, SyntaxType.ConstDecl, children);
@@ -567,6 +579,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "k");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RBRACK, "]");
             }
         }
 
@@ -640,6 +653,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
             }
         } else {
             throw new RuntimeException("Expect '(' in FuncDef");
@@ -706,6 +720,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "k");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RBRACK, "]");
             }
         }
 
@@ -798,6 +813,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
             }
 
             node = parseStmt();
@@ -855,6 +871,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
             }
         } else if (lexer.getToken(curTokenIndex).getType() == TokenType.RETURNTK) {
             addTokenNode(children, curLineNum);
@@ -866,6 +883,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
             }
         } else if (lexer.getToken(curTokenIndex).getType() == TokenType.PRINTFTK) {
             addTokenNode(children, curLineNum);
@@ -885,11 +903,13 @@ public class Parser {
                     addTokenNode(children, curLineNum);
                 } else {
                     ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                    addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
                 }
                 if (lexer.getToken(curTokenIndex).getType() == TokenType.SEMICN) {
                     addTokenNode(children, curLineNum);
                 } else {
                     ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                    addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
                 }
             } else {
                 throw new RuntimeException("Expect '(' in print Stmt");
@@ -911,6 +931,7 @@ public class Parser {
                     addTokenNode(children, curLineNum);
                 } else {
                     ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                    addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
                 }
             } else {
                 node = parseLVal();
@@ -927,6 +948,7 @@ public class Parser {
                                 addTokenNode(children, curLineNum);
                             } else {
                                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "j");
+                                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.RPARENT, ")");
                             }
                         } else {
                             throw new RuntimeException("Expect '(' in Stmt");
@@ -940,6 +962,7 @@ public class Parser {
                         addTokenNode(children, curLineNum);
                     } else {
                         ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                        addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
                     }
                 }
             }
@@ -955,6 +978,7 @@ public class Parser {
                 addTokenNode(children, curLineNum);
             } else {
                 ParserErrors.getInstance().addError(lexer.getToken(curTokenIndex - 1).getLineNum(), "i");
+                addMissedNode(children, lexer.getToken(curTokenIndex - 1).getLineNum(), TokenType.SEMICN, ";");
             }
         }
 
