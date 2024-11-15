@@ -5,6 +5,11 @@ import frontend.AST.SyntaxType;
 import frontend.Error.SymbolErrors;
 import frontend.SymbolManager;
 import frontend.Token.TokenType;
+import llvm.BasicBlock;
+import llvm.Function;
+import llvm.LLVMBuilder;
+import llvm.Value;
+import llvm.type.Int32Type;
 
 import java.util.ArrayList;
 // MainFuncDef ==> 'int' 'main' '(' ')' Block
@@ -45,6 +50,15 @@ public class MainFuncDef extends Node {
             }
         }
 
+    }
 
+    @Override
+    public Value generateIR() {
+        String name = "main";
+        Function function = new Function(Int32Type.getInstance(),name);
+        BasicBlock basicBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getVarName(function));
+        LLVMBuilder.getLlvmBuilder().setCurBlock(basicBlock);
+        super.generateIR();
+        return null;
     }
 }

@@ -7,6 +7,20 @@ import frontend.Symbol.*;
 import frontend.Error.SymbolErrors;
 import frontend.SymbolManager;
 import frontend.Token.TokenType;
+import llvm.Constant;
+import llvm.Function;
+import llvm.LLVMBuilder;
+import llvm.Value;
+import llvm.instr.CallInstr;
+import llvm.instr.TruncInstr;
+import llvm.instr.ZextInstr;
+import llvm.instr.binaryOperatorTy.BinaryOp;
+import llvm.instr.binaryOperatorTy.BinaryOperatorTyInstr;
+import llvm.instr.icmp.IcmpInstr;
+import llvm.instr.icmp.IcmpOp;
+import llvm.type.Int32Type;
+import llvm.type.Int8Type;
+import llvm.type.LLVMEnumType;
 
 import java.util.ArrayList;
 
@@ -28,12 +42,13 @@ public class UnaryExp extends Node {
     }
 
     @Override
-    public int calcValue() {
+    public Integer calcValue() {
         if (children.size() == 1) {
             return children.get(0).calcValue();
         } else if (children.size() == 2) {
             int value = children.get(1).calcValue();
-            TokenNode op = (TokenNode) children.get(0);
+            UnaryOp unaryOp = (UnaryOp) children.get(0);
+            TokenNode op = (TokenNode) unaryOp.getChildren().get(0);
             if (op.getToken().getType() == TokenType.PLUS) {
                 return value;
             } else if (op.getToken().getType() == TokenType.MINU) {
@@ -46,7 +61,7 @@ public class UnaryExp extends Node {
                 }
             }
         } else {
-            return 0;
+            return null;
         }
     }
 
@@ -116,6 +131,50 @@ public class UnaryExp extends Node {
                     SymbolErrors.getInstance().addError(startLine, "e");
                     break;
                 }
+            }
+        }
+    }
+
+    @Override
+    public Value generateIR() {
+        if (children.size() == 1) {
+            return children.get(0).generateIR();
+        } else if (children.size() == 2) {
+            TokenNode op = (TokenNode) children.get(0).getChildren().get(0);
+            Value operand1 = children.get(1).generateIR();
+            if (operand1.getType().getType() == LLVMEnumType.Int8Type || operand1.getType().getType() == LLVMEnumType.BoolType) {
+                operand1 = new ZextInstr(LLVMBuilder.getLlvmBuilder().getVarName(), operand1, Int32Type.getInstance());
+            }
+            Value operand2 = new Constant(0);
+            if (op.getToken().getType() == TokenType.PLUS) {
+                return operand1;
+            } else if (op.getToken().getType() == TokenType.MINU) {
+                return new BinaryOperatorTyInstr(LLVMBuilder.getLlvmBuilder().getVarName(), BinaryOp.SUB, operand2, operand1);
+            } else {
+                return new IcmpInstr(LLVMBuilder.getLlvmBuilder().getVarName(), IcmpOp.EQ ,operand2, operand1);
+            }
+        } else {
+            TokenNode ident = (TokenNode) children.get(0);
+            FuncSymbol funcSymbol = (FuncSymbol) SymbolManager.getInstance().getSymbol(ident.getToken().getValue(), 1);
+            Function function = funcSymbol.getLLVMFunction();
+            ArrayList<Value> arguments = new ArrayList<>();
+            if (children.size() > 3) {
+                FuncRParams funcRParams = (FuncRParams) children.get(2);
+                for (int i = 0; i < funcRParams.getChildren().size(); i += 2) {
+                    Value value = funcRParams.getChildren().get(i).generateIR();
+                    if (value.getType().getType() == LLVMEnumType.Int8Type && funcSymbol.getParams().get(i / 2).getType() == ValueType.Int) {
+                        value = new ZextInstr(LLVMBuilder.getLlvmBuilder().getVarName(), value, Int32Type.getInstance());
+                    } else if (value.getType().getType() == LLVMEnumType.Int32Type && funcSymbol.getParams().get(i / 2).getType() == ValueType.Char) {
+                        value = new TruncInstr(LLVMBuilder.getLlvmBuilder().getVarName(), value, Int8Type.getInstance());
+                    }
+                    arguments.add(value);
+                }
+
+            }
+            if (funcSymbol.getType() == ValueType.Void) {
+                return new CallInstr(null, function, arguments);
+            } else {
+                return new CallInstr(LLVMBuilder.getLlvmBuilder().getVarName(), function, arguments);
             }
         }
     }

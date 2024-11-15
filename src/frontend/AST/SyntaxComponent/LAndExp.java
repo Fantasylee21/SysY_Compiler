@@ -2,6 +2,11 @@ package frontend.AST.SyntaxComponent;
 
 import frontend.AST.Node;
 import frontend.AST.SyntaxType;
+import llvm.LLVMBuilder;
+import llvm.BasicBlock;
+import llvm.Value;
+import llvm.instr.BrInstr;
+import llvm.instr.Instr;
 
 import java.util.ArrayList;
 
@@ -22,5 +27,22 @@ public class LAndExp extends Node {
             cnt--;
         }
         System.out.println("<" + type.toString() + ">");
+    }
+
+    public void generateIRForAnd(BasicBlock thenBlock, BasicBlock elseBlock) {
+        int cnt = children.size();
+        for (int i = 0; i < cnt; i += 2) {
+            EqExp eqExp = (EqExp) children.get(i);
+            if (i + 1 < cnt) {
+                BasicBlock nextBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getBranchName());
+                Value eqValue = eqExp.generateIR();
+                new BrInstr(null, eqValue, nextBlock, elseBlock);
+
+                LLVMBuilder.getLlvmBuilder().setCurBlock(nextBlock);
+            } else {
+                Value eqValue = eqExp.generateIR();
+                new BrInstr(null, eqValue, thenBlock, elseBlock);
+            }
+        }
     }
 }

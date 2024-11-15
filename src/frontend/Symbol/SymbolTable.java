@@ -21,6 +21,10 @@ public class SymbolTable {
         return fatherId;
     }
 
+    public ArrayList<Symbol> getTable() {
+        return table;
+    }
+
     public void put(Symbol symbol) {
         table.add(symbol);
     }

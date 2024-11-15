@@ -2,25 +2,32 @@ package frontend.AST.SyntaxComponent;
 
 import frontend.AST.Node;
 import frontend.AST.SyntaxType;
-import frontend.Symbol.ArraySymbol;
-import frontend.Symbol.FuncSymbol;
-import frontend.Symbol.ValueType;
-import frontend.Symbol.VarSymbol;
+import frontend.Symbol.*;
 import frontend.Error.SymbolErrors;
 import frontend.SymbolManager;
 import frontend.Token.TokenType;
+import llvm.BasicBlock;
+import llvm.Function;
+import llvm.LLVMBuilder;
+import llvm.Value;
+import llvm.instr.AllocaInstr;
+import llvm.instr.Instr;
+import llvm.instr.StoreInstr;
+import llvm.type.*;
 
 import java.util.ArrayList;
 
 //FuncDef ==> FuncType Ident '(' [FuncFParams] ')' Block
 public class FuncDef extends Node {
+    private FuncSymbol funcSymbol;
+
     public FuncDef(int startLine, int endLine, SyntaxType type, ArrayList<Node> children) {
         super(startLine, endLine, type, children);
     }
 
     @Override
     public void checkErrors() {
-        FuncSymbol funcSymbol = createFuncSymbol();
+        funcSymbol = createFuncSymbol();
 
         // enter scope
         SymbolManager.getInstance().enterScope();
@@ -107,5 +114,51 @@ public class FuncDef extends Node {
                 }
             }
         }
+    }
+
+    @Override
+    public Value generateIR() {
+        LLVMType returnType = funcSymbol.getType() == ValueType.Int ? llvm.type.Int32Type.getInstance() : funcSymbol.getType() == ValueType.Char ? llvm.type.Int8Type.getInstance() : VoidType.getInstance();
+        Function function = new Function(returnType, funcSymbol.getName());
+        funcSymbol.setLLVMFunction(function);
+
+//      生成函数参数
+        ArrayList<Symbol> params = funcSymbol.getParams();
+        Value value = null;
+        ArrayList<Value> values = new ArrayList<>();
+        for (Symbol param : params) {
+            if (param instanceof VarSymbol varSymbol) {
+                if (varSymbol.getType() == ValueType.Int) {
+                    value = new Value(Int32Type.getInstance(), LLVMBuilder.getLlvmBuilder().getVarName());
+                } else {
+                    value = new Value(Int8Type.getInstance(), LLVMBuilder.getLlvmBuilder().getVarName());
+                }
+                values.add(value);
+            } else if (param instanceof ArraySymbol arraySymbol) {
+                if (arraySymbol.getType() == ValueType.Int) {
+                    value = new Value(new PointerType(Int32Type.getInstance()), LLVMBuilder.getLlvmBuilder().getVarName());
+                } else {
+                    value = new Value(new PointerType(Int8Type.getInstance()), LLVMBuilder.getLlvmBuilder().getVarName());
+                }
+                values.add(value);
+            }
+        }
+        function.setArguments(values);
+        BasicBlock entry = new BasicBlock(LLVMBuilder.getLlvmBuilder().getVarName(function));
+        LLVMBuilder.getLlvmBuilder().setCurBlock(entry);
+        for (Symbol param : params) {
+            value = values.get(params.indexOf(param));
+            if (param instanceof VarSymbol varSymbol) {
+                Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), value.getType());
+                varSymbol.setLLVMValue(instr);
+                instr = new StoreInstr(null, value, instr);
+            } else if (param instanceof ArraySymbol arraySymbol) {
+                arraySymbol.setLLVMValue(value);
+            }
+        }
+        super.generateIR();
+        function.checkReturn();
+        LLVMBuilder.getLlvmBuilder().resetRegisterCounter();
+        return null;
     }
 }

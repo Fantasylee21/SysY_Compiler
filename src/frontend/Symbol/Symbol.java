@@ -24,4 +24,8 @@ public class Symbol {
     public boolean isConst() {
         return false;
     }
+
+    public String getIRName() {
+        return "@" + name;
+    }
 }

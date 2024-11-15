@@ -1,5 +1,7 @@
 package frontend.AST;
 
+import llvm.Value;
+
 import java.util.ArrayList;
 
 public class Node {
@@ -38,8 +40,8 @@ public class Node {
         System.out.println("<" + type.toString() + ">");
     }
 
-    public int calcValue() {
-        return 0;
+    public Integer calcValue() {
+        return null;
     }
 
     public void checkErrors() {
@@ -52,6 +54,15 @@ public class Node {
 
     public ExpValueType getExpValueType() {
         return ExpValueType.CONSTANT;
+    }
+
+    public Value generateIR() {
+        if (children != null) {
+            for (Node child : children) {
+                child.generateIR();
+            }
+        }
+        return null;
     }
 
 }

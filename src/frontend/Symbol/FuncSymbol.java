@@ -1,9 +1,12 @@
 package frontend.Symbol;
 
+import llvm.Function;
+
 import java.util.ArrayList;
 
 public class FuncSymbol extends Symbol {
     private ArrayList<Symbol> params = new ArrayList<>();
+    private Function llvmFunction;
 
     public FuncSymbol(String name, ValueType type) {
         super(name, type);
@@ -16,6 +19,14 @@ public class FuncSymbol extends Symbol {
 
     public ArrayList<Symbol> getParams() {
         return params;
+    }
+
+    public Function getLLVMFunction() {
+        return llvmFunction;
+    }
+
+    public void setLLVMFunction(Function llvmFunction) {
+        this.llvmFunction = llvmFunction;
     }
 
     public void addParam(Symbol param) {

@@ -84,6 +84,29 @@ public class SymbolManager {
         return null;
     }
 
+    public int getSymbolScopeId(String name) {
+        for (int i = symbolTables.size() - 1; i >= 0; i --) {
+            SymbolTable symbolTable = symbolTables.get(i);
+            Symbol symbol = symbolTable.get(name);
+            if (symbol != null) {
+                return symbolTable.getId();
+            }
+        }
+        return -1;
+    }
+
+    public int getCurrentScopeId() {
+        return symbolTables.peek().getId();
+    }
+
+    public Symbol getSymbol(String name, int scopeId) {
+        SymbolTable symbolTable = symbolTableList.get(scopeId);
+        if (symbolTable == null) {
+            return null;
+        }
+        return symbolTable.get(name);
+    }
+
     public boolean hasSymbolInCurScope(String name) {
         // 在当前作用域内查找
         SymbolTable symbolTable = symbolTables.peek();
@@ -104,5 +127,19 @@ public class SymbolManager {
             return false;
         }
         return lastFuncSymbol.getType() == ValueType.Void;
+    }
+
+    public boolean isGlobalScope() {
+        return symbolTables.size() == 1;
+    }
+
+    public SymbolTable getGlobalSymbolTable() {
+        SymbolTable globalSymbolTable = new SymbolTable(0, 0);
+        for (SymbolTable symbolTable : symbolTableList.values()) {
+            for (Symbol symbol : symbolTable.getTable()) {
+                globalSymbolTable.put(new Symbol(symbol.getIRName(), symbol.getType()));
+            }
+        }
+        return globalSymbolTable;
     }
 }

@@ -4,6 +4,7 @@ import frontend.Error.Error;
 import frontend.Error.LexerErrors;
 import frontend.Error.ParserErrors;
 import frontend.Error.SymbolErrors;
+import llvm.LLVMBuilder;
 
 import java.io.*;
 import java.util.TreeMap;
@@ -70,5 +71,14 @@ public class Compiler {
         for (Integer key : errors.keySet()) {
             System.out.println(key + " " + errors.get(key));
         }
+
+        root.generateIR();
+        //重定向输出到IR.txt
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("llvm_ir.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(LLVMBuilder.getLlvmBuilder().getModule().toString());
     }
 }

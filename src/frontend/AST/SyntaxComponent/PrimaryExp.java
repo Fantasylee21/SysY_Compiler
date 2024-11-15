@@ -3,6 +3,7 @@ package frontend.AST.SyntaxComponent;
 import frontend.AST.ExpValueType;
 import frontend.AST.Node;
 import frontend.AST.SyntaxType;
+import llvm.Value;
 
 import java.util.ArrayList;
 
@@ -13,7 +14,7 @@ public class PrimaryExp extends Node {
     }
 
     @Override
-    public int calcValue() {
+    public Integer calcValue() {
         if (children.size() == 1) {
             return children.get(0).calcValue();
         } else {
@@ -27,6 +28,18 @@ public class PrimaryExp extends Node {
             return children.get(0).getExpValueType();
         } else {
             return children.get(1).getExpValueType();
+        }
+    }
+
+    @Override
+    public Value generateIR() {
+        if (children.size() > 1) {
+            return children.get(1).generateIR();
+        } else {
+            if (children.get(0) instanceof LVal lVal) {
+                return lVal.generateIRForLVal(false);
+            }
+            return children.get(0).generateIR();
         }
     }
 }

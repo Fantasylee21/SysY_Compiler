@@ -11,7 +11,7 @@ public class ConstExp extends Node {
     }
 
     @Override
-    public int calcValue() {
+    public Integer calcValue() {
         return children.get(0).calcValue();
     }
 }

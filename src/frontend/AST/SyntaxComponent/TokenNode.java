@@ -24,7 +24,7 @@ public class TokenNode extends Node {
     }
 
     @Override
-    public int calcValue() {
+    public Integer calcValue() {
         return Integer.parseInt(token.getValue());
     }
 }
