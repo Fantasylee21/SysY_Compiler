@@ -52,6 +52,13 @@ public class LVal extends Node {
             } else if (symbol instanceof ConstVarSymbol) {
                 return ((ConstVarSymbol) symbol).getInitial().getValue();
             }
+        }  else {
+            int index = children.get(2).calcValue();
+            if (symbol instanceof ArraySymbol) {
+                return ((ArraySymbol) symbol).getInitial().getValues().get(index);
+            } else if (symbol instanceof ConstArraySymbol) {
+                return ((ConstArraySymbol) symbol).getInitial().getValues().get(index);
+            }
         }
         return null;
     }

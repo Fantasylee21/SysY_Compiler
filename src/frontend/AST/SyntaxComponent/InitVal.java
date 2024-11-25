@@ -67,7 +67,23 @@ public class InitVal extends Node {
             } else if (child instanceof TokenNode tokenNode) {
                 String str = tokenNode.getToken().getValue();
                 for (int i = 1; i < str.length() - 1; i++) {
-                    values.add(new Constant(str.charAt(i)));
+//                    values.add(new Constant(str.charAt(i)));
+                    if (str.charAt(i) == '\\') {
+                        i++;
+                        if (str.charAt(i) == '0') {
+                            values.add(new Constant(0));
+                        } else if (str.charAt(i) == 'n') {
+                            values.add(new Constant(10));
+                        } else if (str.charAt(i) == 'r') {
+                            values.add(new Constant(13));
+                        } else if (str.charAt(i) == 't') {
+                            values.add(new Constant(9));
+                        } else {
+                            values.add(new Constant(str.charAt(i)));
+                        }
+                    } else {
+                        values.add(new Constant(str.charAt(i)));
+                    }
                 }
             }
         }
