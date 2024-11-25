@@ -1,8 +1,16 @@
 package llvm;
 
-import llvm.instr.RetInstr;
-import llvm.type.LLVMType;
-import llvm.type.OtherType;
+import backend.MipsBuilder;
+import backend.objInstr.*;
+import backend.objInstr.load.LoadType;
+import backend.objInstr.load.ObjLoadInstr;
+import backend.objInstr.store.ObjStoreInstr;
+import backend.objInstr.store.StoreType;
+import backend.register.RealRegister;
+import backend.register.Register;
+import backend.register.VirtualRegister;
+import llvm.midInstr.RetInstr;
+import llvm.type.*;
 
 import java.util.ArrayList;
 
@@ -72,5 +80,52 @@ public class Function extends GlobalValue {
         if (lastBlock.getInstructions().isEmpty() || !(lastBlock.getInstructions().get(lastBlock.getInstructions().size() - 1) instanceof RetInstr)) {
             new RetInstr(null, null);
         }
+    }
+
+    @Override
+    public void generateMips() {
+        MipsBuilder.getMipsBuilder().enterFunction(this);
+        new ObjCommentInstr("enter function " + name.substring(1));
+        new ObjLabelInstr(name.substring(1));
+
+        new ObjCommentInstr("load arguments " + name.substring(1));
+        for (int i = 0; i < arguments.size(); i++) {
+//            if (i == 0) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
+//            } else if (i == 1) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
+//            } else if (i == 2) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
+//            } else if (i == 3) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
+//            } else {
+                Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
+                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
+                if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
+                    new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i));
+                } else {
+                    new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i));
+                }
+//            }
+        }
+        new ObjCommentInstr("end arguments " + name.substring(1));
+//        if (!name.equals("@main")) {
+//            new ObjNopInstr();
+//        }
+
+        for (BasicBlock basicBlock : basicBlocks) {
+            basicBlock.generateMips();
+        }
+
+        MipsBuilder.getMipsBuilder().exitFunction();
+//        new ObjCommentInstr("return function " + name.substring(1));
+//        if (name.equals("@main")) {
+//            new ObjLiInstr(Register.get$v0(), 10);
+//            new ObjSyscallInstr();
+//        } else {
+//            new ObjJRInstr(Register.get$ra());
+//        }
+
+
     }
 }

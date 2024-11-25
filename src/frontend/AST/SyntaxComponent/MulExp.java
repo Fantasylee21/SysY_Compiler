@@ -6,10 +6,10 @@ import frontend.AST.SyntaxType;
 import frontend.Token.TokenType;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.Instr;
-import llvm.instr.ZextInstr;
-import llvm.instr.binaryOperatorTy.BinaryOp;
-import llvm.instr.binaryOperatorTy.BinaryOperatorTyInstr;
+import llvm.midInstr.MidInstr;
+import llvm.midInstr.ZextInstr;
+import llvm.midInstr.binaryOperatorTy.BinaryOp;
+import llvm.midInstr.binaryOperatorTy.BinaryOperatorTyInstr;
 import llvm.type.Int32Type;
 import llvm.type.LLVMEnumType;
 
@@ -73,7 +73,7 @@ public class MulExp extends Node {
             return operand1;
         }
         Value operand2 = null;
-        Instr instr = null;
+        MidInstr instr = null;
         int cnt = children.size();
         for (int i = 1; i < cnt; i += 2) {
             TokenNode op = (TokenNode) children.get(i);

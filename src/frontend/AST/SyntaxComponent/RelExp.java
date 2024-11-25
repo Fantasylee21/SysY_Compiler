@@ -5,9 +5,9 @@ import frontend.AST.SyntaxType;
 import frontend.Token.TokenType;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.ZextInstr;
-import llvm.instr.icmp.IcmpInstr;
-import llvm.instr.icmp.IcmpOp;
+import llvm.midInstr.ZextInstr;
+import llvm.midInstr.icmp.IcmpInstr;
+import llvm.midInstr.icmp.IcmpOp;
 import llvm.type.Int32Type;
 import llvm.type.LLVMEnumType;
 

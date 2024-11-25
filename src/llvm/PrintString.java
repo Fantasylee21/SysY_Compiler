@@ -1,5 +1,6 @@
 package llvm;
 
+import backend.objInstr.global.ObjAsciizInstr;
 import llvm.type.ArrayType;
 import llvm.type.Int8Type;
 import llvm.type.LLVMType;
@@ -18,6 +19,11 @@ public class PrintString extends GlobalValue {
     public String toString() {
         String content = value.replace("\\", "\\5C").replace("\n", "\\0A").replace("\0", "\\00");
         return name + " = private unnamed_addr constant [" + (value.length() + 1) + " x i8] c\"" + content + "\\00\"";
+    }
+
+    @Override
+    public void generateMips() {
+        new ObjAsciizInstr(name.substring(1), value);
     }
 
 }

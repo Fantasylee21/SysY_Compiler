@@ -56,4 +56,8 @@ public class Value {
         return type.toString() + " " + name;
     }
 
+    public void generateMips() {
+        return;
+    }
+
 }

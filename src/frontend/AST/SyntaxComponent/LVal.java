@@ -9,10 +9,10 @@ import frontend.SymbolManager;
 import llvm.Constant;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.GetElementPtrInstr;
-import llvm.instr.Instr;
-import llvm.instr.LoadInstr;
-import llvm.instr.ZextInstr;
+import llvm.midInstr.GetElementPtrInstr;
+import llvm.midInstr.MidInstr;
+import llvm.midInstr.LoadInstr;
+import llvm.midInstr.ZextInstr;
 import llvm.type.Int32Type;
 import llvm.type.Int8Type;
 import llvm.type.LLVMEnumType;
@@ -51,6 +51,13 @@ public class LVal extends Node {
                 return ((VarSymbol) symbol).getInitial().getValue();
             } else if (symbol instanceof ConstVarSymbol) {
                 return ((ConstVarSymbol) symbol).getInitial().getValue();
+            }
+        } else {
+            int index = children.get(2).calcValue();
+            if (symbol instanceof ArraySymbol) {
+                return ((ArraySymbol) symbol).getInitial().getValues().get(index);
+            } else if (symbol instanceof ConstArraySymbol) {
+                return ((ConstArraySymbol) symbol).getInitial().getValues().get(index);
             }
         }
         return null;
@@ -104,7 +111,7 @@ public class LVal extends Node {
         if (children.size() != 1) {
             expValue = children.get(2).generateIR();
         }
-        Instr instr = null;
+        MidInstr instr = null;
         if (symbol instanceof VarSymbol varSymbol) {
             if (isLeftAssign) {
                 return varSymbol.getLLVMValue();

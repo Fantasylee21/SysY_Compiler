@@ -5,8 +5,7 @@ import frontend.AST.SyntaxType;
 import llvm.LLVMBuilder;
 import llvm.BasicBlock;
 import llvm.Value;
-import llvm.instr.BrInstr;
-import llvm.instr.Instr;
+import llvm.midInstr.BrInstr;
 
 import java.util.ArrayList;
 

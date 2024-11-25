@@ -15,7 +15,7 @@ import llvm.LLVMBuilder;
 import llvm.Value;
 import llvm.initial.ArrayInitial;
 import llvm.initial.VarInitial;
-import llvm.instr.*;
+import llvm.midInstr.*;
 import llvm.type.*;
 
 import java.util.ArrayList;
@@ -136,7 +136,7 @@ public class VarDecl extends Node {
                     }
                 } else {
                     if (symbol instanceof VarSymbol varSymbol) {
-                        Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), llvmType);
+                        MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), llvmType);
                         varSymbol.setLLVMValue(instr);
                         if (node.getChildren().get(node.getChildren().size() - 1) instanceof InitVal initVal) {
                             Value value = initVal.generateIRList().get(0);
@@ -150,7 +150,7 @@ public class VarDecl extends Node {
                             instr = new StoreInstr(null, value ,instr);
                         }
                     } else if (symbol instanceof ArraySymbol arraySymbol) {
-                        Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), new ArrayType(llvmType, arraySymbol.getSize()));
+                        MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), new ArrayType(llvmType, arraySymbol.getSize()));
                         arraySymbol.setLLVMValue(instr);
                         if (node.getChildren().get(node.getChildren().size() - 1) instanceof InitVal initVal) {
                             Value pointer = instr;

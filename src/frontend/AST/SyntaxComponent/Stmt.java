@@ -6,8 +6,8 @@ import frontend.Error.SymbolErrors;
 import frontend.SymbolManager;
 import frontend.Token.TokenType;
 import llvm.*;
-import llvm.instr.*;
-import llvm.instr.io.*;
+import llvm.midInstr.*;
+import llvm.midInstr.io.*;
 import llvm.type.*;
 
 import java.util.ArrayList;
@@ -155,7 +155,7 @@ public class Stmt extends Node {
                     if (formatString.charAt(i) == '%') {
                         if (!sb.isEmpty()) {
                             PrintString printString = new PrintString(LLVMBuilder.getLlvmBuilder().getPrintStringName(), sb.toString());
-                            Instr instr = new PutStrInstr(null, printString);
+                            MidInstr instr = new PutStrInstr(null, printString);
                             sb = new StringBuilder();
                         }
                         if (formatString.charAt(i + 1) == 'd') {
@@ -163,14 +163,14 @@ public class Stmt extends Node {
                             if (expValue.getType().getType() == LLVMEnumType.Int8Type) {
                                 expValue = new ZextInstr(LLVMBuilder.getLlvmBuilder().getVarName(), expValue, Int32Type.getInstance());
                             }
-                            Instr instr = new PutIntInstr(null, expValue);
+                            MidInstr instr = new PutIntInstr(null, expValue);
                             i++;
                         } else if (formatString.charAt(i + 1) == 'c') {
                             Value expValue = expValues.get(expIndex++);
                             if (expValue.getType().getType() == LLVMEnumType.Int8Type) {
                                 expValue = new ZextInstr(LLVMBuilder.getLlvmBuilder().getVarName(), expValue, Int32Type.getInstance());
                             }
-                            Instr instr = new PutChInstr(null, expValue);
+                            MidInstr instr = new PutChInstr(null, expValue);
                             i++;
                         }
                     } else if (formatString.charAt(i) == '\\') {
@@ -189,7 +189,7 @@ public class Stmt extends Node {
                 }
                 if (!sb.isEmpty()) {
                     PrintString printString = new PrintString(LLVMBuilder.getLlvmBuilder().getPrintStringName(), sb.toString());
-                    Instr instr = new PutStrInstr(null, printString);
+                    MidInstr instr = new PutStrInstr(null, printString);
                 }
                 return null;
             } else if (tokenNode.getToken().getType() == TokenType.FORTK) {

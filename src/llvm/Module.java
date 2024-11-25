@@ -1,5 +1,13 @@
 package llvm;
 
+import backend.MipsBuilder;
+import backend.objInstr.ObjCommentInstr;
+import backend.objInstr.ObjLabelInstr;
+import backend.objInstr.ObjLiInstr;
+import backend.objInstr.ObjSyscallInstr;
+import backend.objInstr.jump.JumpType;
+import backend.objInstr.jump.ObjJumpInstr;
+import backend.register.Register;
 import llvm.type.OtherType;
 
 import java.util.ArrayList;
@@ -73,5 +81,39 @@ public class Module extends Value {
             code.append(function.toString()).append("\n");
         }
         return code.toString();
+    }
+
+    public void generateMips() {
+        for (PrintString printString : printStrings) {
+            printString.generateMips();
+        }
+        for (GlobalVariable globalVariable : globalVariables) {
+            globalVariable.generateMips();
+        }
+        new ObjCommentInstr("Jump to main");
+        new ObjJumpInstr(JumpType.JAL, "main");
+
+        new ObjCommentInstr("Exit program");
+        new ObjJumpInstr(JumpType.JAL, "exit");
+
+        int maxFuncParamSize = 0;
+        for (Function function : functions) {
+            int paramSize = function.getArguments().size();
+            if (paramSize > maxFuncParamSize) {
+                maxFuncParamSize = paramSize;
+            }
+        }
+        maxFuncParamSize *= 4;
+        if (maxFuncParamSize < 0) {
+            maxFuncParamSize = 0;
+        }
+        MipsBuilder.getMipsBuilder().setMaxFuncParamSize(maxFuncParamSize);
+
+        for (Function function : functions) {
+            function.generateMips();
+        }
+        new ObjLabelInstr("exit");
+        new ObjLiInstr(Register.get$v0(), 10);
+        new ObjSyscallInstr();
     }
 }

@@ -1,3 +1,4 @@
+import backend.MipsBuilder;
 import frontend.*;
 import frontend.AST.Node;
 import frontend.Error.Error;
@@ -80,5 +81,30 @@ public class Compiler {
             e.printStackTrace();
         }
         System.out.println(LLVMBuilder.getLlvmBuilder().getModule().toString());
+        //重定向输出到mips.txt
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("mipsTemp.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        LLVMBuilder.getLlvmBuilder().getModule().generateMips();
+        System.out.println(MipsBuilder.getMipsBuilder().toString());
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("mips.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        MipsBuilder.getMipsBuilder().allocateRegister();
+        MipsBuilder.getMipsBuilder().setFuncSize();
+        System.out.println(MipsBuilder.getMipsBuilder().toString());
+
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("mips.asm"));
+            writer.write(MipsBuilder.getMipsBuilder().toString());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -11,13 +11,13 @@ import llvm.Constant;
 import llvm.Function;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.CallInstr;
-import llvm.instr.TruncInstr;
-import llvm.instr.ZextInstr;
-import llvm.instr.binaryOperatorTy.BinaryOp;
-import llvm.instr.binaryOperatorTy.BinaryOperatorTyInstr;
-import llvm.instr.icmp.IcmpInstr;
-import llvm.instr.icmp.IcmpOp;
+import llvm.midInstr.CallInstr;
+import llvm.midInstr.TruncInstr;
+import llvm.midInstr.ZextInstr;
+import llvm.midInstr.binaryOperatorTy.BinaryOp;
+import llvm.midInstr.binaryOperatorTy.BinaryOperatorTyInstr;
+import llvm.midInstr.icmp.IcmpInstr;
+import llvm.midInstr.icmp.IcmpOp;
 import llvm.type.Int32Type;
 import llvm.type.Int8Type;
 import llvm.type.LLVMEnumType;
@@ -172,7 +172,7 @@ public class UnaryExp extends Node {
 
             }
             if (funcSymbol.getType() == ValueType.Void) {
-                return new CallInstr(null, function, arguments);
+                return new CallInstr(LLVMBuilder.getLlvmBuilder().getVarName(), function, arguments);
             } else {
                 return new CallInstr(LLVMBuilder.getLlvmBuilder().getVarName(), function, arguments);
             }

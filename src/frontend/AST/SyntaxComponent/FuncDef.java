@@ -10,9 +10,9 @@ import llvm.BasicBlock;
 import llvm.Function;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.AllocaInstr;
-import llvm.instr.Instr;
-import llvm.instr.StoreInstr;
+import llvm.midInstr.AllocaInstr;
+import llvm.midInstr.MidInstr;
+import llvm.midInstr.StoreInstr;
 import llvm.type.*;
 
 import java.util.ArrayList;
@@ -149,7 +149,7 @@ public class FuncDef extends Node {
         for (Symbol param : params) {
             value = values.get(params.indexOf(param));
             if (param instanceof VarSymbol varSymbol) {
-                Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), value.getType());
+                MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), value.getType());
                 varSymbol.setLLVMValue(instr);
                 instr = new StoreInstr(null, value, instr);
             } else if (param instanceof ArraySymbol arraySymbol) {

@@ -5,12 +5,11 @@ import frontend.AST.SyntaxType;
 import frontend.Error.SymbolErrors;
 import llvm.LLVMBuilder;
 import llvm.Value;
-import llvm.instr.StoreInstr;
-import llvm.instr.TruncInstr;
-import llvm.instr.ZextInstr;
+import llvm.midInstr.StoreInstr;
+import llvm.midInstr.TruncInstr;
+import llvm.midInstr.ZextInstr;
 import llvm.type.*;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 // ForStmt ==> LVal '=' Exp
 public class ForStmt extends Node {

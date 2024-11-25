@@ -14,12 +14,11 @@ import llvm.GlobalVariable;
 import llvm.LLVMBuilder;
 import llvm.Value;
 import llvm.initial.ArrayInitial;
-import llvm.initial.Initial;
 import llvm.initial.VarInitial;
-import llvm.instr.AllocaInstr;
-import llvm.instr.GetElementPtrInstr;
-import llvm.instr.Instr;
-import llvm.instr.StoreInstr;
+import llvm.midInstr.AllocaInstr;
+import llvm.midInstr.GetElementPtrInstr;
+import llvm.midInstr.MidInstr;
+import llvm.midInstr.StoreInstr;
 import llvm.type.*;
 
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public class ConstDecl extends Node {
                     }
                 } else {
                     if (symbol instanceof ConstVarSymbol constVarSymbol) {
-                        Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), llvmType);
+                        MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), llvmType);
                         constVarSymbol.setLLVMValue(instr);
                         int value = constVarSymbol.getInitial().getValue();
                         Value constant = new Constant(value);
@@ -113,7 +112,7 @@ public class ConstDecl extends Node {
                         }
                         instr = new StoreInstr(null, constant, instr);
                     } else if (symbol instanceof ConstArraySymbol constArraySymbol) {
-                        Instr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), new ArrayType(llvmType, constArraySymbol.getSize()));
+                        MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), new ArrayType(llvmType, constArraySymbol.getSize()));
                         constArraySymbol.setLLVMValue(instr);
                         Value pointer = instr;
                         for (int i = 0; i < constArraySymbol.getSize(); i++) {

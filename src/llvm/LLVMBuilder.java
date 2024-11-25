@@ -1,6 +1,6 @@
 package llvm;
 
-import llvm.instr.Instr;
+import llvm.midInstr.MidInstr;
 
 import java.util.HashMap;
 import java.util.Stack;
@@ -45,7 +45,7 @@ public class LLVMBuilder {
     }
 
     public static String generateBranch() {
-        return "b" + branchCounter++;
+        return "branch" + branchCounter++;
     }
 
     public Module getModule() {
@@ -89,7 +89,7 @@ public class LLVMBuilder {
         curFunction.removeBasicBlock(name);
     }
 
-    public void addInstruction(Instr instr) {
+    public void addInstruction(MidInstr instr) {
         curBasicBlock.addInstr(instr);
         instr.setParentBasicBlock(curBasicBlock);
     }
