@@ -65,50 +65,48 @@ public class CallInstr extends MidInstr {
         new ObjCommentInstr("call start");
         for (int i = 1; i < operands.size(); i ++) {
             Register register = MipsBuilder.getMipsBuilder().getRegister(operands.get(i));
-//            if (i == 1) {
-//                if (operands.get(i) instanceof Constant) {
-//                    new ObjLiInstr(Register.get$a0(), ((Constant) operands.get(i)).getValue());
-//                } else {
-//                    new ObjMoveInstr(Register.get$a0(), register);
-//                }
-//            } else if (i == 2) {
-//                if (operands.get(i) instanceof Constant) {
-//                    new ObjLiInstr(Register.get$a1(), ((Constant) operands.get(i)).getValue());
-//                } else {
-//                    new ObjMoveInstr(Register.get$a1(), register);
-//                }
-//            } else if (i == 3) {
-//                if (operands.get(i) instanceof Constant) {
-//                    new ObjLiInstr(Register.get$a2(), ((Constant) operands.get(i)).getValue());
-//                } else {
-//                    new ObjMoveInstr(Register.get$a2(), register);
-//                }
-//            } else if (i == 4) {
-//                if (operands.get(i) instanceof Constant) {
-//                    new ObjLiInstr(Register.get$a3(), ((Constant) operands.get(i)).getValue());
-//                } else {
-//                    new ObjMoveInstr(Register.get$a3(), register);
-//                }
-//            } else {
+            if (i == 1) {
+                if (operands.get(i) instanceof Constant) {
+                    new ObjLiInstr(Register.get$a0(), ((Constant) operands.get(i)).getValue());
+                } else {
+                    new ObjMoveInstr(Register.get$a0(), register);
+                }
+            } else if (i == 2) {
+                if (operands.get(i) instanceof Constant) {
+                    new ObjLiInstr(Register.get$a1(), ((Constant) operands.get(i)).getValue());
+                } else {
+                    new ObjMoveInstr(Register.get$a1(), register);
+                }
+            } else if (i == 3) {
+                if (operands.get(i) instanceof Constant) {
+                    new ObjLiInstr(Register.get$a2(), ((Constant) operands.get(i)).getValue());
+                } else {
+                    new ObjMoveInstr(Register.get$a2(), register);
+                }
+            } else if (i == 4) {
+                if (operands.get(i) instanceof Constant) {
+                    new ObjLiInstr(Register.get$a3(), ((Constant) operands.get(i)).getValue());
+                } else {
+                    new ObjMoveInstr(Register.get$a3(), register);
+                }
+            } else {
                 if (operands.get(i) instanceof Constant) {
                     register = new Register(VirtualRegister.getVirtualRegister().getRegister());
                     new ObjLiInstr(register, ((Constant) operands.get(i)).getValue());
                 }
 //                TODO: i - 5 实现不存前四个参数
                 if (operands.get(i).getType() instanceof Int8Type) {
-                    new ObjStoreInstr(StoreType.SB, register, Register.get$sp(), (i - 1) * 4);
+                    new ObjStoreInstr(StoreType.SB, register, Register.get$sp(), (i - 5) * 4);
                 } else {
-                    new ObjStoreInstr(StoreType.SW, register, Register.get$sp(), (i - 1) * 4);
+                    new ObjStoreInstr(StoreType.SW, register, Register.get$sp(), (i - 5) * 4);
                 }
-                MipsBuilder.getMipsBuilder().addStackFrameValue((i - 1) * 4 ,register);
-//            }
+            }
         }
         new ObjStoreInstr(StoreType.SW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());
 //        for (int i = 0; i < 8; i++) {
 //            Register register = Register.get$s(i);
 //            int offset = MipsBuilder.getMipsBuilder().getMaxFuncParamSize() + 4 * i + 4;
 //            new ObjStoreInstr(StoreType.SW, register, Register.get$sp(), offset);
-//            MipsBuilder.getMipsBuilder().addStackFrameValue(offset, register);
 //        }
 
         new ObjJumpInstr(JumpType.JAL, getTargetFunc().getName().substring(1));
@@ -120,7 +118,8 @@ public class CallInstr extends MidInstr {
 
 //        for (int i = 0; i < 8; i++) {
 //            Register register = Register.get$s(i);
-//            new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize() + 4 * i + 4);
+//            int offset = MipsBuilder.getMipsBuilder().getMaxFuncParamSize() + 4 * i + 4;
+//            new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), offset);
 //        }
 
         new ObjLoadInstr(LoadType.LW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());

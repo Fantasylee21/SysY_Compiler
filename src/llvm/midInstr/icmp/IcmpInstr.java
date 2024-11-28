@@ -3,19 +3,12 @@ package llvm.midInstr.icmp;
 import backend.MipsBuilder;
 import backend.objInstr.ObjLaInstr;
 import backend.objInstr.ObjLiInstr;
-import backend.objInstr.dm.DmType;
-import backend.objInstr.dm.ObjDmInstr;
 import backend.objInstr.load.LoadType;
 import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.move.MoveType;
-import backend.objInstr.move.ObjMoveHLInstr;
 import backend.objInstr.riCalculate.ObjRICalculate;
 import backend.objInstr.riCalculate.RICalculateType;
 import backend.objInstr.rrCalculate.ObjRRCalculateInstr;
 import backend.objInstr.rrCalculate.RRCalculateType;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
-import backend.register.RealRegister;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.Constant;
@@ -23,10 +16,7 @@ import llvm.GlobalVariable;
 import llvm.Value;
 import llvm.midInstr.MidInstr;
 import llvm.midInstr.MidInstrType;
-import llvm.midInstr.binaryOperatorTy.BinaryOp;
 import llvm.type.BoolType;
-
-import static llvm.midInstr.icmp.IcmpOp.*;
 
 public class IcmpInstr extends MidInstr {
     private IcmpOp op;

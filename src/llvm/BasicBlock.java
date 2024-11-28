@@ -1,5 +1,7 @@
 package llvm;
 
+import backend.MipsBuilder;
+import backend.ObjBlock;
 import backend.objInstr.ObjLabelInstr;
 import llvm.midInstr.MidInstr;
 import llvm.midInstr.MidInstrType;
@@ -56,10 +58,12 @@ public class BasicBlock extends Value {
     }
 
     public void generateMips() {
-        new ObjLabelInstr(name);
+        ObjBlock objBlock = new ObjBlock(name);
+        MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
         for (MidInstr instr : instructions) {
             instr.generateMips();
         }
+        MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
     }
 
 }

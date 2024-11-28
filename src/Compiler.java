@@ -89,14 +89,15 @@ public class Compiler {
         }
         LLVMBuilder.getLlvmBuilder().getModule().generateMips();
         System.out.println(MipsBuilder.getMipsBuilder().toString());
+
         try {
             System.setOut(new PrintStream(new FileOutputStream("mips.txt")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        MipsBuilder.getMipsBuilder().allocateRegister();
-        MipsBuilder.getMipsBuilder().setFuncSize();
-        System.out.println(MipsBuilder.getMipsBuilder().toString());
+//        MipsBuilder.getMipsBuilder().allocateRegister();
+//        MipsBuilder.getMipsBuilder().setFuncSize();
+        System.out.println(MipsBuilder.getMipsBuilder().getObjModule().toString());
 
 
         try {

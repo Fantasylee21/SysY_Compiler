@@ -4,7 +4,6 @@ import backend.MipsBuilder;
 import backend.objInstr.ObjLaInstr;
 import backend.objInstr.load.LoadType;
 import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.store.ObjStoreInstr;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.GlobalVariable;
@@ -12,7 +11,6 @@ import llvm.Value;
 import llvm.type.LLVMEnumType;
 import llvm.type.LLVMType;
 import llvm.type.PointerType;
-import backend.objInstr.store.StoreType;
 
 public class LoadInstr extends MidInstr {
     public LoadInstr(String name, Value pointer) {

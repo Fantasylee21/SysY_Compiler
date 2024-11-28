@@ -4,17 +4,10 @@ import backend.MipsBuilder;
 import backend.objInstr.*;
 import backend.objInstr.jump.JumpType;
 import backend.objInstr.jump.ObjJumpInstr;
-import backend.objInstr.load.LoadType;
-import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
 import backend.register.Register;
-import backend.register.VirtualRegister;
 import llvm.Constant;
 import llvm.Function;
-import llvm.GlobalVariable;
 import llvm.Value;
-import llvm.type.LLVMEnumType;
 import llvm.type.VoidType;
 
 import java.util.Objects;
@@ -35,7 +28,7 @@ public class RetInstr extends MidInstr {
 
     @Override
     public void generateMips() {
-        Function currentFunc = MipsBuilder.getMipsBuilder().getCurrentFunction();
+        Function currentFunc = MipsBuilder.getMipsBuilder().getCurrentFunction().getLlvmFunction();
         if (operands.get(0) != null && !Objects.equals(currentFunc.getName(), "@main")) {
             if (operands.get(0) instanceof Constant) {
                 new ObjLiInstr(Register.get$v0(), ((Constant) operands.get(0)).getValue());

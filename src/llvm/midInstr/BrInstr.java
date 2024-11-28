@@ -1,20 +1,12 @@
 package llvm.midInstr;
 
 import backend.MipsBuilder;
-import backend.objInstr.ObjLaInstr;
 import backend.objInstr.branch.BranchType;
 import backend.objInstr.branch.ObjBranchInstr;
 import backend.objInstr.jump.JumpType;
 import backend.objInstr.jump.ObjJumpInstr;
-import backend.objInstr.load.LoadType;
-import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
-import backend.register.RealRegister;
 import backend.register.Register;
-import backend.register.VirtualRegister;
 import llvm.BasicBlock;
-import llvm.GlobalVariable;
 import llvm.Value;
 import llvm.type.VoidType;
 

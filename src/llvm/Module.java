@@ -90,30 +90,8 @@ public class Module extends Value {
         for (GlobalVariable globalVariable : globalVariables) {
             globalVariable.generateMips();
         }
-        new ObjCommentInstr("Jump to main");
-        new ObjJumpInstr(JumpType.JAL, "main");
-
-        new ObjCommentInstr("Exit program");
-        new ObjJumpInstr(JumpType.JAL, "exit");
-
-        int maxFuncParamSize = 0;
-        for (Function function : functions) {
-            int paramSize = function.getArguments().size();
-            if (paramSize > maxFuncParamSize) {
-                maxFuncParamSize = paramSize;
-            }
-        }
-        maxFuncParamSize *= 4;
-        if (maxFuncParamSize < 0) {
-            maxFuncParamSize = 0;
-        }
-        MipsBuilder.getMipsBuilder().setMaxFuncParamSize(maxFuncParamSize);
-
         for (Function function : functions) {
             function.generateMips();
         }
-        new ObjLabelInstr("exit");
-        new ObjLiInstr(Register.get$v0(), 10);
-        new ObjSyscallInstr();
     }
 }

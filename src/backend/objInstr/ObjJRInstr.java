@@ -1,7 +1,6 @@
 package backend.objInstr;
 
 import backend.MipsBuilder;
-import backend.objInstr.jump.JumpType;
 import backend.register.Register;
 
 public class ObjJRInstr extends ObjInstr {

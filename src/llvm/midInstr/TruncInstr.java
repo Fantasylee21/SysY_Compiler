@@ -2,14 +2,9 @@ package llvm.midInstr;
 
 import backend.MipsBuilder;
 import backend.objInstr.ObjLiInstr;
-import backend.objInstr.load.LoadType;
-import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.Constant;
-import llvm.GlobalVariable;
 import llvm.Value;
 import llvm.type.LLVMType;
 

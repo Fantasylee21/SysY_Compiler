@@ -171,6 +171,7 @@ public class UnaryExp extends Node {
                 }
 
             }
+            LLVMBuilder.getLlvmBuilder().getCurFunction().setCallMaxParam(arguments.size());
             if (funcSymbol.getType() == ValueType.Void) {
                 return new CallInstr(LLVMBuilder.getLlvmBuilder().getVarName(), function, arguments);
             } else {

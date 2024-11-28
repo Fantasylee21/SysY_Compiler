@@ -4,8 +4,6 @@ import backend.MipsBuilder;
 import backend.objInstr.ObjLiInstr;
 import backend.objInstr.ObjMoveInstr;
 import backend.objInstr.ObjSyscallInstr;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.midInstr.MidInstr;

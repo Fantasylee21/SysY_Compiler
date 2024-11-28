@@ -1,16 +1,11 @@
 package llvm.midInstr.io;
 
 import backend.MipsBuilder;
-import backend.objInstr.ObjLaInstr;
 import backend.objInstr.ObjLiInstr;
 import backend.objInstr.ObjMoveInstr;
 import backend.objInstr.ObjSyscallInstr;
-import backend.objInstr.load.LoadType;
-import backend.objInstr.load.ObjLoadInstr;
 import backend.register.Register;
-import backend.register.VirtualRegister;
 import llvm.Constant;
-import llvm.GlobalVariable;
 import llvm.Value;
 import llvm.midInstr.MidInstr;
 import llvm.midInstr.MidInstrType;

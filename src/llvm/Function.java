@@ -1,12 +1,11 @@
 package llvm;
 
 import backend.MipsBuilder;
+import backend.ObjBlock;
+import backend.ObjFunction;
 import backend.objInstr.*;
 import backend.objInstr.load.LoadType;
 import backend.objInstr.load.ObjLoadInstr;
-import backend.objInstr.store.ObjStoreInstr;
-import backend.objInstr.store.StoreType;
-import backend.register.RealRegister;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.midInstr.RetInstr;
@@ -18,6 +17,7 @@ public class Function extends GlobalValue {
     private ArrayList<Value> arguments;
     private ArrayList<BasicBlock> basicBlocks;
     private LLVMType returnType;
+    private int callMaxParam = 0;
 
     public Function(LLVMType returnType, String name) {
         super(OtherType.getFunction(), "@" + name);
@@ -25,6 +25,12 @@ public class Function extends GlobalValue {
         this.basicBlocks = new ArrayList<>();
         this.returnType = returnType;
         LLVMBuilder.getLlvmBuilder().addFunction(this);
+    }
+
+    public void setCallMaxParam(int callMaxParam) {
+        if (callMaxParam > this.callMaxParam) {
+            this.callMaxParam = callMaxParam;
+        }
     }
 
     public ArrayList<Value> getArguments() {
@@ -84,21 +90,26 @@ public class Function extends GlobalValue {
 
     @Override
     public void generateMips() {
-        MipsBuilder.getMipsBuilder().enterFunction(this);
-        new ObjCommentInstr("enter function " + name.substring(1));
-        new ObjLabelInstr(name.substring(1));
+        ObjFunction objFunction = new ObjFunction(name.substring(1));
+        objFunction.setLlvmFunction(this);
+        int paramSize = callMaxParam * 4;
+        objFunction.setParamSize(paramSize);
+        MipsBuilder.getMipsBuilder().enterFunction(objFunction);
+
+        ObjBlock objBlock = new ObjBlock(name.substring(1) + "_entry_branch");
+        MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
 
         new ObjCommentInstr("load arguments " + name.substring(1));
         for (int i = 0; i < arguments.size(); i++) {
-//            if (i == 0) {
-//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
-//            } else if (i == 1) {
-//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
-//            } else if (i == 2) {
-//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
-//            } else if (i == 3) {
-//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
-//            } else {
+            if (i == 0) {
+                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
+            } else if (i == 1) {
+                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
+            } else if (i == 2) {
+                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
+            } else if (i == 3) {
+                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
+            } else {
                 Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
                 MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
                 if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
@@ -106,25 +117,17 @@ public class Function extends GlobalValue {
                 } else {
                     new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i));
                 }
-//            }
+            }
         }
         new ObjCommentInstr("end arguments " + name.substring(1));
-//        if (!name.equals("@main")) {
-//            new ObjNopInstr();
-//        }
+
+        MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
 
         for (BasicBlock basicBlock : basicBlocks) {
             basicBlock.generateMips();
         }
 
         MipsBuilder.getMipsBuilder().exitFunction();
-//        new ObjCommentInstr("return function " + name.substring(1));
-//        if (name.equals("@main")) {
-//            new ObjLiInstr(Register.get$v0(), 10);
-//            new ObjSyscallInstr();
-//        } else {
-//            new ObjJRInstr(Register.get$ra());
-//        }
 
 
     }

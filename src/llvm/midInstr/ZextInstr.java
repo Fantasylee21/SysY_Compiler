@@ -2,7 +2,6 @@ package llvm.midInstr;
 
 import backend.MipsBuilder;
 import backend.objInstr.ObjLiInstr;
-import backend.register.RealRegister;
 import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.Constant;
