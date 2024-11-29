@@ -91,7 +91,7 @@ public class GetElementPtrInstr extends MidInstr {
 //                new ObjRRCalculateInstr(RRCalculateType.ADD, ans, pointer, offset);
 //            } else {
                 new ObjRICalculate(RICalculateType.SLL, offset, offset, 2);
-                new ObjRRCalculateInstr(RRCalculateType.ADD, ans, pointer, offset);
+                new ObjRRCalculateInstr(RRCalculateType.ADDU, ans, pointer, offset);
 //            }
         }
 

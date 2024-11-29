@@ -14,136 +14,92 @@ int getarray(int a[]){
     return n;
 }
 
-// 全局变量定义
-int globalNumbers[15];
-char globalCharacters[10];
-int globalCount = 5;
-char globalSwitch = 'M';
+// Global variable definitions
+int a;
+int b;
+int arr[10];
+char c;
+char arr2[5];
 
-// 函数定义
-int computeMaximum(int arr[], int len) {
+// Function to calculate sum of array elements
+int sum(int arr[], int n) {
+    int total;
+    total = 0;
     int i;
-    int maxValue = arr[0];
-    for (i = 1; i < len; i = i + 1) {
-        if (arr[i] > maxValue || arr[i] == maxValue && i % 2 == 0) {
-            maxValue = arr[i];
-        }
+    for(i = 0; i < n; i = i + 1) {
+        total = total + arr[i];
     }
-    return maxValue;
+    return total;
 }
 
-char classifyChar(char c) {
-    if (c >= 'A' && c <= 'Z') {
-        return 'U';
-    } else {
-        if (c >= 'a' && c <= 'z') {
-            return 'L';
-        } else {
-            return 'N'; // 非字母字符
-        }
+// Function to check if a number is even
+int is_even(int num) {
+    if(num % 2 == 0) {
+        return 1;
     }
-    return 'E'; // 不可达分支
+    return 0;
 }
 
-void adjustArray(int arr[], int len, int multiplier, int offset) {
-    int i;
-    for (i = 0; i < len; i = i + 1) {
-        if (arr[i] % 2 == 0 || multiplier > offset && i % 3 == 0) {
-            arr[i] = arr[i] * multiplier + offset;
-        } else {
-            arr[i] = arr[i] - offset;
-        }
-    }
-}
-
-int evaluateNestedConditions(int arr[], int len, char condition) {
-    if (len > 10 || condition == 'A' && arr[0] != 0) {
-        return computeMaximum(arr, len);
-    } else {
-        if (condition == 'B') {
-            int sum = 0;
-            int i;
-            for (i = 0; i < len; i = i + 1) {
-                sum = sum + arr[i];
-            }
-            return sum;
-        } else {
-            if (condition == 'C') {
-                return -1;
-            }
-        }
-    }
-    return 0; // 默认返回值
-}
-
-void initializeCharacterArray(char arr[], int len) {
-    int i;
-    for (i = 0; i < len; i = i + 1) {
-        arr[i] = 'A' + (i % 26);
-    }
-}
-
-int specialSum(int a, int b, char flag) {
-    if (flag == 'X' || flag == 'Y' && a > b) {
-        return a * b;
-    } else {
-        return a + b;
-    }
-}
-
-void printIntegerArray(int arr[], int len) {
-    int i;
-    for (i = 0; i < len; i = i + 1) {
-        printf("Array[%d]: %d\n", i, arr[i]);
-    }
-}
-
-// 主函数
+// Main function
 int main() {
-    int localArray[7];
-    char charArray[8];
+    int x;
     int i;
-    int result = 0;
-    int maxVal = 0;
+    int j;
+    int temp;
+    char ch;
 
-    // 初始化全局数组
-    for (i = 0; i < 15; i = i + 1) {
-        globalNumbers[i] = i + 5;
-    }
+    x = getint(); // Using getint for assignment, not initialization
+    ch = getchar(); // Using getchar for assignment
 
-    // 初始化局部数组
-    for (i = 0; i < 7; i = i + 1) {
-        localArray[i] = i * 3;
-    }
-
-    // 初始化字符数组
-    initializeCharacterArray(charArray, 8);
-
-    // 嵌套控制流和函数调用
-    if (globalSwitch == 'M' || globalCount < 10 && globalSwitch != 'N') {
-        result = evaluateNestedConditions(globalNumbers, 15, 'A');
-    } else {
-        if (globalSwitch == 'P') {
-            result = evaluateNestedConditions(localArray, 7, 'B');
-        } else {
-            result = specialSum(globalCount, result, 'X');
+    // Complex loop and if conditions with nested branches
+    for(i = 0; i < 5; i = i + 1) {
+        if(x > 10) {
+            for(j = 0; j < 5; j = j + 1) {
+                if(j < 2) {
+                    arr[j] = x + j;
+                }
+                else {
+                    arr[j] = x - j;
+                }
+            }
+        }
+        else {
+            for(j = 0; j < 5; j = j + 1) {
+                if(j % 2 == 0) {
+                    arr[j] = x * j;
+                }
+                else {
+                    arr[j] = x / (j + 1);
+                }
+            }
         }
     }
 
-    // 调整数组并打印
-    adjustArray(globalNumbers, 15, 2, 1);
-    adjustArray(localArray, 7, 3, 2);
-    printIntegerArray(globalNumbers, 15);
-    printIntegerArray(localArray, 7);
-
-    // 打印字符数组
-    for (i = 0; i < 8; i = i + 1) {
-        char classified = classifyChar(charArray[i]);
-        printf("Char %c classified as: %c\n", charArray[i], classified);
+    // Nested function calls with complex conditions
+    if(is_even(x) == 1 && sum(arr, 5) > 15) {
+        a = sum(arr, 5);
+    }
+    else {
+        a = 0;
+        if(is_even(x) == 0) {
+            b = 1;
+        }
+        else {
+            b = 2;
+        }
     }
 
-    printf("Final Result: %d, Max Value: %d\n", result, maxVal);
+    // More loops and conditionals with complex control flows
+    for(i = 0; i < 10; i = i + 1) {
+        if(arr[i] == 0) {
+            arr[i] = x + i;
+        }
+        else {
+            arr[i] = arr[i] * 2;
+        }
+    }
 
+    // Return statement as per rules
     return 0;
 }
 

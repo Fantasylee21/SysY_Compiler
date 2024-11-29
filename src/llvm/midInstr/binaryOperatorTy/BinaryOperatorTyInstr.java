@@ -83,11 +83,11 @@ public class BinaryOperatorTyInstr extends MidInstr {
                 if (constant1 != null && constant2 != null) {
                     new ObjLiInstr(ans, constant1 + constant2);
                 } else if (constant1 != null) {
-                    new ObjRICalculate(RICalculateType.ADDI, ans, rt, constant1);
+                    new ObjRICalculate(RICalculateType.ADDIU, ans, rt, constant1);
                 } else if (constant2 != null) {
-                    new ObjRICalculate(RICalculateType.ADDI, ans, rs, constant2);
+                    new ObjRICalculate(RICalculateType.ADDIU, ans, rs, constant2);
                 } else {
-                    new ObjRRCalculateInstr(RRCalculateType.ADD, ans, rs, rt);
+                    new ObjRRCalculateInstr(RRCalculateType.ADDU, ans, rs, rt);
                 }
                 break;
             case SUB:
@@ -97,11 +97,11 @@ public class BinaryOperatorTyInstr extends MidInstr {
                     rs = new Register(VirtualRegister.getVirtualRegister().getRegister());
                     MipsBuilder.getMipsBuilder().addRegisterAllocation(operand2, rs);
                     new ObjLiInstr(rs, constant1);
-                    new ObjRRCalculateInstr(RRCalculateType.SUB, ans, rs, rt);
+                    new ObjRRCalculateInstr(RRCalculateType.SUBU, ans, rs, rt);
                 } else if (constant2 != null) {
                     new ObjRICalculate(RICalculateType.SUBU, ans, rs, constant2);
                 } else {
-                    new ObjRRCalculateInstr(RRCalculateType.SUB, ans, rs, rt);
+                    new ObjRRCalculateInstr(RRCalculateType.SUBU, ans, rs, rt);
                 }
                 break;
             case AND:
