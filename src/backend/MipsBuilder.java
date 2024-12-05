@@ -1,6 +1,7 @@
 package backend;
 
 import backend.objInstr.ObjInstr;
+import backend.optimize.RegAllocator;
 import backend.register.Register;
 import llvm.Value;
 
@@ -25,6 +26,7 @@ public class MipsBuilder {
     private ObjFunction currentFunction;
     private ObjModule objModule;
     private LinkedList<HashMap<Value, Register>> registerStack;
+    private RegAllocator regAllocator;
 
     private MipsBuilder() {
         currentFunction = null;
@@ -34,6 +36,12 @@ public class MipsBuilder {
 
     public static MipsBuilder getMipsBuilder() {
         return mipsBuilder;
+    }
+
+    public ObjModule getObjModule(boolean isOpt) {
+        regAllocator = new RegAllocator(objModule);
+        regAllocator.allocReg();
+        return objModule;
     }
 
     public ObjModule getObjModule() {
@@ -75,7 +83,6 @@ public class MipsBuilder {
     }
 
     public void exitFunction() {
-        currentFunction.setStackSize(currentFunction.getCurOffset());
         objModule.addFunction(currentFunction);
         currentFunction = null;
     }

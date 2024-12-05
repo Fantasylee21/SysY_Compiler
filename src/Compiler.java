@@ -88,21 +88,24 @@ public class Compiler {
             e.printStackTrace();
         }
         LLVMBuilder.getLlvmBuilder().getModule().generateMips();
-        System.out.println(MipsBuilder.getMipsBuilder().toString());
+        System.out.println(MipsBuilder.getMipsBuilder().getObjModule().toString());
 
         try {
             System.setOut(new PrintStream(new FileOutputStream("mips.txt")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        MipsBuilder.getMipsBuilder().allocateRegister();
-//        MipsBuilder.getMipsBuilder().setFuncSize();
-        System.out.println(MipsBuilder.getMipsBuilder().getObjModule().toString());
-
-
+        System.out.println(MipsBuilder.getMipsBuilder().getObjModule(true).toString());
+//        将mips.txt复制到mips.asm
         try {
+            BufferedReader reader = new BufferedReader(new FileReader("mips.txt"));
             BufferedWriter writer = new BufferedWriter(new FileWriter("mips.asm"));
-            writer.write(MipsBuilder.getMipsBuilder().toString());
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line);
+                writer.newLine();
+            }
+            reader.close();
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();

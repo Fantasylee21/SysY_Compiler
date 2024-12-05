@@ -42,11 +42,11 @@ public class ObjModule {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(".text\n");
+        sb.append(".data\n");
         for (ObjInstr instr : globalVariables) {
             sb.append(instr.toString()).append("\n");
         }
-        sb.append("\n.data\n");
+        sb.append("\n.text\n");
         sb.append("\tjal main\n");
         sb.append("\tjal exit\n");
         sb.append("\n");

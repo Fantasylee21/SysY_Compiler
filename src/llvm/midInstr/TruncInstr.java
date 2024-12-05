@@ -18,6 +18,11 @@ public class TruncInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name + " = trunc " + operands.get(0).getType().toString() + " " + operands.get(0).getName() + " to " + targetType.toString();
     }

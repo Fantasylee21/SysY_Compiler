@@ -25,6 +25,11 @@ public class GetElementPtrInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         Value pointer = operands.get(0);
         Value offset = operands.get(1);

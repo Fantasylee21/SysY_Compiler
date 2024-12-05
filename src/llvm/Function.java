@@ -12,12 +12,15 @@ import llvm.midInstr.RetInstr;
 import llvm.type.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Function extends GlobalValue {
     private ArrayList<Value> arguments;
     private ArrayList<BasicBlock> basicBlocks;
     private LLVMType returnType;
     private int callMaxParam = 0;
+    private HashMap<BasicBlock, ArrayList<BasicBlock>> preMap;
+    private HashMap<BasicBlock, ArrayList<BasicBlock>> sucMap;
 
     public Function(LLVMType returnType, String name) {
         super(OtherType.getFunction(), "@" + name);
@@ -31,6 +34,22 @@ public class Function extends GlobalValue {
         if (callMaxParam > this.callMaxParam) {
             this.callMaxParam = callMaxParam;
         }
+    }
+
+    public void setPreMap(HashMap<BasicBlock, ArrayList<BasicBlock>> preMap) {
+        this.preMap = preMap;
+    }
+
+    public void setSucMap(HashMap<BasicBlock, ArrayList<BasicBlock>> sucMap) {
+        this.sucMap = sucMap;
+    }
+
+    public HashMap<BasicBlock, ArrayList<BasicBlock>> getSucMap() {
+        return sucMap;
+    }
+
+    public HashMap<BasicBlock, ArrayList<BasicBlock>> getPreMap() {
+        return preMap;
     }
 
     public ArrayList<Value> getArguments() {
@@ -113,9 +132,9 @@ public class Function extends GlobalValue {
                 Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
                 MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
                 if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
-                    new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i));
+                    new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i - 4));
                 } else {
-                    new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i));
+                    new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i - 4));
                 }
             }
         }

@@ -24,6 +24,11 @@ public class AllocaInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public void generateMips() {
         LLVMType targetType = ((PointerType) getType()).getTargetType();
         Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());

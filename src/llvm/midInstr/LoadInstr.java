@@ -19,6 +19,11 @@ public class LoadInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name + " = load " + getType().toString() + ", " + operands.get(0).getType().toString() + " " + operands.get(0).getName();
     }

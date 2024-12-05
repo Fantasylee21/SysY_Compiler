@@ -8,10 +8,16 @@ import llvm.midInstr.MidInstrType;
 import llvm.type.OtherType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class BasicBlock extends Value {
     private ArrayList<MidInstr> instructions;
     private Function parentFunction;
+    private ArrayList<BasicBlock> successors;
+    private ArrayList<BasicBlock> predecessors;
+
+    private HashSet<Value> def;
+    private HashSet<Value> use;
 
     public BasicBlock(String name) {
         super(OtherType.getBasicBlock(), name);
@@ -19,6 +25,14 @@ public class BasicBlock extends Value {
         this.parentFunction = null;
 
         LLVMBuilder.getLlvmBuilder().addBasicBlock(this);
+    }
+
+    public void setSuccessors(ArrayList<BasicBlock> successors) {
+        this.successors = successors;
+    }
+
+    public void setPredecessors(ArrayList<BasicBlock> predecessors) {
+        this.predecessors = predecessors;
     }
 
     public void setParentFunction(Function parentFunction) {
@@ -66,4 +80,18 @@ public class BasicBlock extends Value {
         MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
     }
 
+    public void setDefUse() {
+        def = new HashSet<>();
+        use = new HashSet<>();
+        for (MidInstr instr : instructions) {
+            for (Value operand : instr.getOperands()) {
+                if (!def.contains(operand)) {
+                    use.add(operand);
+                }
+            }
+            if (!use.contains(instr) && instr.isDef()) {
+                def.add(instr);
+            }
+        }
+    }
 }

@@ -66,6 +66,21 @@ public class Register {
         }
     }
 
+    public static Register get$a(int i) {
+        switch (i) {
+            case 0:
+                return new Register(RealRegister.A0);
+            case 1:
+                return new Register(RealRegister.A1);
+            case 2:
+                return new Register(RealRegister.A2);
+            case 3:
+                return new Register(RealRegister.A3);
+            default:
+                return null;
+        }
+    }
+
     public static Register get$t(int i) {
         switch (i) {
             case 0:

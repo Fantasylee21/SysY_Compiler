@@ -14,6 +14,10 @@ public class ObjJumpInstr extends ObjInstr {
         MipsBuilder.getMipsBuilder().addTextInstr(this);
     }
 
+    public JumpType getJumpType() {
+        return jumpType;
+    }
+
     public void setLabel(String label) {
         this.label = label;
     }

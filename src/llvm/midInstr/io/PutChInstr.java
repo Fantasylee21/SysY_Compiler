@@ -24,7 +24,7 @@ public class PutChInstr extends MidInstr {
     @Override
     public void generateMips() {
         Value value = operands.get(0);
-//        new ObjMoveInstr(Register.get$k0(), Register.get$a0());
+        new ObjMoveInstr(Register.get$t9(), Register.get$a0());
         if (value instanceof Constant) {
             new ObjLiInstr(Register.get$a0(), ((Constant) value).getValue());
         } else {
@@ -33,6 +33,6 @@ public class PutChInstr extends MidInstr {
         }
         new ObjLiInstr(Register.get$v0(), 11);
         new ObjSyscallInstr();
-//        new ObjMoveInstr(Register.get$a0(), Register.get$k0());
+        new ObjMoveInstr(Register.get$a0(), Register.get$t9());
     }
 }

@@ -38,6 +38,11 @@ public class CallInstr extends MidInstr {
         return operands.subList(1, operands.size());
     }
 
+    @Override
+    public boolean isDef() {
+        return !(type instanceof VoidType) && !getUseList().isEmpty();
+    }
+
     @Override public String toString() {
         StringBuilder sb = new StringBuilder();
         if (type instanceof VoidType) {
@@ -63,6 +68,8 @@ public class CallInstr extends MidInstr {
     @Override
     public void generateMips() {
         new ObjCommentInstr("call start");
+        new ObjStoreInstr(StoreType.SW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());
+
         for (int i = 1; i < operands.size(); i ++) {
             Register register = MipsBuilder.getMipsBuilder().getRegister(operands.get(i));
             if (i == 1) {
@@ -102,7 +109,6 @@ public class CallInstr extends MidInstr {
                 }
             }
         }
-        new ObjStoreInstr(StoreType.SW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());
 //        for (int i = 0; i < 8; i++) {
 //            Register register = Register.get$s(i);
 //            int offset = MipsBuilder.getMipsBuilder().getMaxFuncParamSize() + 4 * i + 4;
@@ -111,18 +117,19 @@ public class CallInstr extends MidInstr {
 
         new ObjJumpInstr(JumpType.JAL, getTargetFunc().getName().substring(1));
 
-        Register retValue = new Register(VirtualRegister.getVirtualRegister().getRegister());
-        MipsBuilder.getMipsBuilder().addRegisterAllocation(this, retValue);
+        new ObjLoadInstr(LoadType.LW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());
+        if (!(type instanceof VoidType) && !getUseList().isEmpty()) {
+            Register retValue = new Register(VirtualRegister.getVirtualRegister().getRegister());
+            MipsBuilder.getMipsBuilder().addRegisterAllocation(this, retValue);
 
-        new ObjMoveInstr(retValue, Register.get$v0());
+            new ObjMoveInstr(retValue, Register.get$v0());
+        }
 
 //        for (int i = 0; i < 8; i++) {
 //            Register register = Register.get$s(i);
 //            int offset = MipsBuilder.getMipsBuilder().getMaxFuncParamSize() + 4 * i + 4;
 //            new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), offset);
 //        }
-
-        new ObjLoadInstr(LoadType.LW, Register.get$ra(), Register.get$sp(), MipsBuilder.getMipsBuilder().getMaxFuncParamSize());
 
         new ObjCommentInstr("call end");
     }

@@ -9,6 +9,7 @@ import backend.objInstr.jump.JumpType;
 import backend.objInstr.jump.ObjJumpInstr;
 import backend.register.Register;
 import llvm.type.OtherType;
+import midend.MidOptimize;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,7 @@ public class Module extends Value {
             declare void @putch(i32)
             declare void @putstr(i8*)
             """;
+    private MidOptimize midOptimize;
 
     public Module() {
         super(OtherType.getModule(), "CompUnit");
@@ -84,6 +86,8 @@ public class Module extends Value {
     }
 
     public void generateMips() {
+        midOptimize = new MidOptimize(this);
+        midOptimize.run();
         for (PrintString printString : printStrings) {
             printString.generateMips();
         }

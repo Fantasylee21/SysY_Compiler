@@ -37,6 +37,11 @@ public class BinaryOperatorTyInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name + " = " + op.toString().toLowerCase() + " "+ type.toString() + " " +
                 operands.get(0).getName() + ", " + operands.get(1).getName();

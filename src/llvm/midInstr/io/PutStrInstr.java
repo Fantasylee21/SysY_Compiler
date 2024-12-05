@@ -2,6 +2,7 @@ package llvm.midInstr.io;
 
 import backend.objInstr.ObjLaInstr;
 import backend.objInstr.ObjLiInstr;
+import backend.objInstr.ObjMoveInstr;
 import backend.objInstr.ObjSyscallInstr;
 import backend.register.RealRegister;
 import backend.register.Register;
@@ -26,8 +27,10 @@ public class PutStrInstr extends MidInstr {
 
     @Override
     public void generateMips() {
+        new ObjMoveInstr(Register.get$t9(), Register.get$a0());
         new ObjLaInstr(Register.get$a0(), value.getName().substring(1));
         new ObjLiInstr(Register.get$v0(), 4);
         new ObjSyscallInstr();
+        new ObjMoveInstr(Register.get$a0(), Register.get$t9());
     }
 }

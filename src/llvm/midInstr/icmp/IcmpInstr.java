@@ -33,6 +33,11 @@ public class IcmpInstr extends MidInstr {
     }
 
     @Override
+    public boolean isDef() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return name + " = icmp " + op.toString().toLowerCase() + " "+ operands.get(0).getType().toString() + " " +
                 operands.get(0).getName() + ", " + operands.get(1).getName();
