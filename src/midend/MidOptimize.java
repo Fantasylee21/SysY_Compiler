@@ -12,7 +12,7 @@ public class MidOptimize {
         CFGBuilder cfgBuilder = new CFGBuilder(module);
         DelDeadCode delDeadCode = new DelDeadCode(module);
         delDeadBlock.run();
-        cfgBuilder.run();
         delDeadCode.run();
+        cfgBuilder.run();
     }
 }

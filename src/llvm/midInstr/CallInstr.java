@@ -14,6 +14,7 @@ import backend.register.Register;
 import backend.register.VirtualRegister;
 import llvm.Constant;
 import llvm.Function;
+import llvm.LLVMBuilder;
 import llvm.Value;
 import llvm.type.Int8Type;
 import llvm.type.VoidType;
@@ -24,6 +25,7 @@ import java.util.List;
 public class CallInstr extends MidInstr {
     public CallInstr(String name, Function function, ArrayList<Value> arguments) {
         super(function.getReturnType(), name, MidInstrType.CALL);
+        LLVMBuilder.getLlvmBuilder().getCurFunction().addCallFunc(function);
         addOperand(function);
         for (Value argument : arguments) {
             addOperand(argument);

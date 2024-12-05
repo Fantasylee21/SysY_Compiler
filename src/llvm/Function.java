@@ -13,6 +13,7 @@ import llvm.type.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Function extends GlobalValue {
     private ArrayList<Value> arguments;
@@ -21,6 +22,8 @@ public class Function extends GlobalValue {
     private int callMaxParam = 0;
     private HashMap<BasicBlock, ArrayList<BasicBlock>> preMap;
     private HashMap<BasicBlock, ArrayList<BasicBlock>> sucMap;
+    private HashSet<Function> callFunc = new HashSet<>();
+    private boolean isUsed = false;
 
     public Function(LLVMType returnType, String name) {
         super(OtherType.getFunction(), "@" + name);
@@ -42,6 +45,22 @@ public class Function extends GlobalValue {
 
     public void setSucMap(HashMap<BasicBlock, ArrayList<BasicBlock>> sucMap) {
         this.sucMap = sucMap;
+    }
+
+    public void addCallFunc(Function function) {
+        callFunc.add(function);
+    }
+
+    public HashSet<Function> getCallFunc() {
+        return callFunc;
+    }
+
+    public void setUsed() {
+        isUsed = true;
+    }
+
+    public boolean isUsed() {
+        return isUsed;
     }
 
     public HashMap<BasicBlock, ArrayList<BasicBlock>> getSucMap() {

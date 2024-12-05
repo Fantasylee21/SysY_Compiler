@@ -60,6 +60,9 @@ public class CFGBuilder {
         for (Function function : module.getFunctions()) {
             init(function);
             buildCFG(function);
+            for (BasicBlock basicBlock : function.getBasicBlocks()) {
+                basicBlock.setDefUse();
+            }
         }
     }
 }

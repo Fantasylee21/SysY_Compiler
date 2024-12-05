@@ -59,6 +59,22 @@ public class BasicBlock extends Value {
         }
     }
 
+    public HashSet<Value> getDef() {
+        return def;
+    }
+
+    public HashSet<Value> getUse() {
+        return use;
+    }
+
+    public ArrayList<BasicBlock> getSuccessors() {
+        return successors;
+    }
+
+    public ArrayList<BasicBlock> getPredecessors() {
+        return predecessors;
+    }
+
     @Override
     public String toString() {
         removeExtraInstr();
