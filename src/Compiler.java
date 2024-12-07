@@ -6,6 +6,7 @@ import frontend.Error.LexerErrors;
 import frontend.Error.ParserErrors;
 import frontend.Error.SymbolErrors;
 import llvm.LLVMBuilder;
+import llvm.midOptimize.MidOptimize;
 
 import java.io.*;
 import java.util.TreeMap;
@@ -76,12 +77,22 @@ public class Compiler {
         root.generateIR();
         //重定向输出到IR.txt
         try {
-            System.setOut(new PrintStream(new FileOutputStream("llvm_ir.txt")));
+            System.setOut(new PrintStream(new FileOutputStream("llvm_ir_Ori.txt")));
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println(LLVMBuilder.getLlvmBuilder().getModule().toString());
         //重定向输出到mips.txt
+        try {
+            System.setOut(new PrintStream(new FileOutputStream("llvm_ir.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        MidOptimize midOptimize = new MidOptimize(LLVMBuilder.getLlvmBuilder().getModule());
+        midOptimize.run();
+        System.out.println(LLVMBuilder.getLlvmBuilder().getModule().toString());
+
         try {
             System.setOut(new PrintStream(new FileOutputStream("mipsTemp.txt")));
         } catch (Exception e) {

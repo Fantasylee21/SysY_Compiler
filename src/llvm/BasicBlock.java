@@ -13,8 +13,8 @@ import java.util.HashSet;
 public class BasicBlock extends Value {
     private ArrayList<MidInstr> instructions;
     private Function parentFunction;
-    private ArrayList<BasicBlock> successors;
-    private ArrayList<BasicBlock> predecessors;
+    private ArrayList<BasicBlock> successors = new ArrayList<>();
+    private ArrayList<BasicBlock> predecessors = new ArrayList<>();
 
     private HashSet<Value> def;
     private HashSet<Value> use;
@@ -25,6 +25,12 @@ public class BasicBlock extends Value {
         this.parentFunction = null;
 
         LLVMBuilder.getLlvmBuilder().addBasicBlock(this);
+    }
+
+    public BasicBlock(String name, boolean after) {
+        super(OtherType.getBasicBlock(), name);
+        this.instructions = new ArrayList<>();
+        this.parentFunction = null;
     }
 
     public void setSuccessors(ArrayList<BasicBlock> successors) {
@@ -109,5 +115,42 @@ public class BasicBlock extends Value {
                 def.add(instr);
             }
         }
+    }
+
+    private BasicBlock parent;
+    private ArrayList<BasicBlock> children = new ArrayList<>();
+    private ArrayList<BasicBlock> dominators = new ArrayList<>();
+    private ArrayList<BasicBlock> dominanceFrontiers = new ArrayList<>();
+
+    public void setParent(BasicBlock parent) {
+        this.parent = parent;
+    }
+
+    public BasicBlock getParent() {
+        return parent;
+    }
+
+    public void setChildren(ArrayList<BasicBlock> children) {
+        this.children = children;
+    }
+
+    public ArrayList<BasicBlock> getChildren() {
+        return children;
+    }
+
+    public void setDominators(ArrayList<BasicBlock> dominators) {
+        this.dominators = dominators;
+    }
+
+    public ArrayList<BasicBlock> getDominators() {
+        return dominators;
+    }
+
+    public void setDominanceFrontiers(ArrayList<BasicBlock> dominanceFrontiers) {
+        this.dominanceFrontiers = dominanceFrontiers;
+    }
+
+    public ArrayList<BasicBlock> getDominanceFrontiers() {
+        return dominanceFrontiers;
     }
 }

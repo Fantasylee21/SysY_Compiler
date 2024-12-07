@@ -17,6 +17,12 @@ public class MidInstr extends User {
         LLVMBuilder.getLlvmBuilder().addInstruction(this);
     }
 
+    public MidInstr(LLVMType type, String name, MidInstrType instrType, boolean after) {
+        super(type, name);
+        this.instrType = instrType;
+        parentBasicBlock = null;
+    }
+
     public boolean isDef() {
         return false;
     }

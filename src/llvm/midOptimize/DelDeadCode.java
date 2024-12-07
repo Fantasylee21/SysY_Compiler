@@ -1,4 +1,4 @@
-package midend;
+package llvm.midOptimize;
 import llvm.BasicBlock;
 import llvm.Function;
 import llvm.Module;

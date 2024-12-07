@@ -4,6 +4,7 @@ import llvm.type.LLVMType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 public class Value {
     protected LLVMType type;
@@ -49,6 +50,16 @@ public class Value {
                 break;
             }
         }
+    }
+
+    public void replaceAllUsesWith(Value newValue) {
+        ArrayList<User> users = useList.stream()
+                .map(Use::getUser)
+                .collect(Collectors.toCollection(ArrayList::new));
+        for (User user : users) {
+            user.replaceValue(this, newValue);
+        }
+
     }
 
     @Override

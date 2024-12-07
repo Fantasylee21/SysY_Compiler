@@ -23,14 +23,13 @@ public class User extends Value {
         }
     }
 
-    public boolean replaceValue(Value oldValue, Value newValue) {
-        boolean replaced = false;
+    public void replaceValue(Value oldValue, Value newValue) {
         for (int i = 0; i < operands.size(); i++) {
             if (operands.get(i) == oldValue) {
                 operands.set(i, newValue);
-                replaced = true;
+                oldValue.removeUser(this);
+                newValue.addUse(this);
             }
         }
-        return replaced;
     }
 }

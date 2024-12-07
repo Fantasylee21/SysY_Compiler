@@ -20,4 +20,5 @@ public enum MidInstrType {
     PUTINT,
     PUTCH,
     PUTSTR,
+    PCOPY
 }
