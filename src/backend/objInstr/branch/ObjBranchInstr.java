@@ -27,6 +27,10 @@ public class ObjBranchInstr extends ObjInstr {
         return rt;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public void setRs(Register rs) {
         this.rs = rs;
     }

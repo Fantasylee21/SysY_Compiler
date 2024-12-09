@@ -18,6 +18,10 @@ public class ObjJumpInstr extends ObjInstr {
         return jumpType;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public void setLabel(String label) {
         this.label = label;
     }

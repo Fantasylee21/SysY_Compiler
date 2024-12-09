@@ -1,3 +1,4 @@
+import backend.BackOptimize;
 import backend.MipsBuilder;
 import frontend.*;
 import frontend.AST.Node;
@@ -98,6 +99,9 @@ public class Compiler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        BackOptimize backOptimize = new BackOptimize(MipsBuilder.getMipsBuilder().getObjModule());
+        backOptimize.run();
+
         LLVMBuilder.getLlvmBuilder().getModule().generateMips();
         System.out.println(MipsBuilder.getMipsBuilder().getObjModule().toString());
 
