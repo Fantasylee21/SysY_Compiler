@@ -14,30 +14,26 @@ int getarray(int a[]){
     return n;
 }
 
-
-
-
-int n;
-
-void print_move(int a, char from, char to) {
-    printf("Moca move otter %d from queue %c to queue %c\n", a, from, to);
+int getIndex(int arr[], int index) {
+    return arr[index];
 }
 
-void move(int a[], int len, char from, char by, char to) {
-    printf("%c\n", to);
+int setIndex(int arr[], int index, int val) {
+    int temp = arr[index];
+    arr[index] = val;
+    return temp;
 }
 
 int main() {
-    n = 2;
-
-    int a[200], i;
-    for (i = 0; i < n; i = i + 1) {
-        a[i] = i + 1;
-    }
-    move(a, n, 'A', 'B', 'C');
+    int arr1[5] = {0, 1, 2, 3, 4};
+    int arr2[5] = {0, 0, 0, 0, 0};
+    printf("%d\n", setIndex(arr2, 0, getIndex(arr1, 0) + 0));
+    printf("%d\n", setIndex(arr2, 1, getIndex(arr1, 1) + 1));
+    printf("%d\n", setIndex(arr2, 2, getIndex(arr1, 2) + 2));
+    printf("%d\n", setIndex(arr2, 3, getIndex(arr1, 3) + 3));
+    printf("%d\n", setIndex(arr2, 4, getIndex(arr1, 4) + 4));
     return 0;
 }
-
 
 
 

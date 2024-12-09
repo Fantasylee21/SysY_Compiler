@@ -337,7 +337,7 @@ public class ObjFunction {
             if (!activeStart.containsKey(register.toString())){
                 activeStart.put(register.toString(), line);
             }
-            if (activeMap.get(register.toString()).size() == 1 || !sucHasLive(register, block)) {
+            if (activeMap.get(register.toString()).size() == 1) {
                 activeEnd.put(register.toString(), line);
             } else {
                 toAdd.add(register.toString());

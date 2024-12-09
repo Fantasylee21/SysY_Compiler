@@ -134,35 +134,64 @@ public class Function extends GlobalValue {
         objFunction.setParamSize(paramSize);
         MipsBuilder.getMipsBuilder().enterFunction(objFunction);
 
-        ObjBlock objBlock = new ObjBlock(name.substring(1) + "_entry_branch");
-        MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
+//        ObjBlock objBlock = new ObjBlock(name.substring(1) + "_entry_branch");
+//        MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
 
-        new ObjCommentInstr("load arguments " + name.substring(1));
-        for (int i = 0; i < arguments.size(); i++) {
-            if (i == 0) {
-                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
-            } else if (i == 1) {
-                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
-            } else if (i == 2) {
-                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
-            } else if (i == 3) {
-                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
-            } else {
-                Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
-                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
-                if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
-                    new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i - 4));
-                } else {
-                    new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i - 4));
-                }
-            }
-        }
-        new ObjCommentInstr("end arguments " + name.substring(1));
+//
+//        new ObjCommentInstr("load arguments " + name.substring(1));
+//        for (int i = 0; i < arguments.size(); i++) {
+//            if (i == 0) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
+//            } else if (i == 1) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
+//            } else if (i == 2) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
+//            } else if (i == 3) {
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
+//            } else {
+//                Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
+//                MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
+//                if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
+//                    new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i - 4));
+//                } else {
+//                    new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i - 4));
+//                }
+//            }
+//        }
+//        new ObjCommentInstr("end arguments " + name.substring(1));
 
-        MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
+//        MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
 
+        boolean first = true;
         for (BasicBlock basicBlock : basicBlocks) {
+            ObjBlock objBlock = new ObjBlock(basicBlock.getName());
+            MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
+            if (first) {
+                first = false;
+                new ObjCommentInstr("load arguments " + name.substring(1));
+                for (int i = 0; i < arguments.size(); i++) {
+                    if (i == 0) {
+                        MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a0());
+                    } else if (i == 1) {
+                        MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a1());
+                    } else if (i == 2) {
+                        MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a2());
+                    } else if (i == 3) {
+                        MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), Register.get$a3());
+                    } else {
+                        Register register = new Register(VirtualRegister.getVirtualRegister().getRegister());
+                        MipsBuilder.getMipsBuilder().addRegisterAllocation(arguments.get(i), register);
+                        if (arguments.get(i).getType().getType() == LLVMEnumType.Int8Type) {
+                            new ObjLoadInstr(LoadType.LB, register, Register.get$sp(), 4 * (i - 4));
+                        } else {
+                            new ObjLoadInstr(LoadType.LW, register, Register.get$sp(), 4 * (i - 4));
+                        }
+                    }
+                }
+                new ObjCommentInstr("end arguments " + name.substring(1));
+            }
             basicBlock.generateMips();
+            MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
         }
 
         MipsBuilder.getMipsBuilder().exitFunction();

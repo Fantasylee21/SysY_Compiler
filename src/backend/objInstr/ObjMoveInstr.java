@@ -14,6 +14,12 @@ public class ObjMoveInstr extends ObjInstr {
         MipsBuilder.getMipsBuilder().addTextInstr(this);
     }
 
+    public ObjMoveInstr(Register dst, Register src, boolean after) {
+        super();
+        this.dst = new Register(dst.getRealRegister(), dst.getVirtualReg());
+        this.src = new Register(src.getRealRegister(), src.getVirtualReg());
+    }
+
     public Register getDst() {
         return dst;
     }
@@ -32,6 +38,9 @@ public class ObjMoveInstr extends ObjInstr {
 
     @Override
     public String toString() {
+        if (dst.toString().equals(src.toString())) {
+            return "";
+        }
         return "move " + dst.toString() + ", " + src.toString();
     }
 }

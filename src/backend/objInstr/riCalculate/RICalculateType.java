@@ -17,4 +17,5 @@ public enum RICalculateType {
     SEQ,
     SNE,
     SLL,
+    SRL,
 }

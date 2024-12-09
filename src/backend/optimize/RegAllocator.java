@@ -16,6 +16,7 @@ import backend.objInstr.rrCalculate.ObjRRCalculateInstr;
 import backend.objInstr.store.ObjStoreInstr;
 import backend.objInstr.store.StoreType;
 import backend.register.Register;
+import llvm.Function;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -163,6 +164,17 @@ public class RegAllocator {
                             for (int i = 0; i < argSize; i++) {
                                 if (i < 4) {
                                     toAddPut(line - cnt + 1, new ObjStoreInstr(StoreType.SW, Register.get$a(i), Register.get$sp(), offset, true));
+                                    int j = callCommentLine;
+                                    while (j < objBlock.getInstructions().indexOf(instr)) {
+                                        ObjInstr objInstr = objBlock.getInstructions().get(j);
+                                        if (objInstr instanceof ObjMoveInstr moveInstr && moveInstr.getSrc().toString().equals(Register.get$a(i).toString())) {
+                                            int aNum1 = Integer.parseInt(moveInstr.getDst().toString().substring(2));
+                                            if (aNum1 > i) {
+                                                objBlock.getInstructions().set(j, new ObjLoadInstr(LoadType.LW, moveInstr.getDst(), Register.get$sp(), offset, true));
+                                            }
+                                        }
+                                        j++;
+                                    }
                                     offset += 4;
                                 }
                             }
@@ -303,8 +315,12 @@ public class RegAllocator {
                             toAddPut(line, new ObjLoadInstr(LoadType.LW, Register.get$k0(), Register.get$sp(), getOffset(register), true));
                         } else {
                             int curOffset = objFunction.getCurOffset();
-                            frame.put(curOffset, register.getVirtualReg());
-                            objFunction.curOffsetUp(4);
+                            if (getOffset(register) == -1) {
+                                frame.put(curOffset, register.getVirtualReg());
+                                objFunction.curOffsetUp(4);
+                            } else {
+                                curOffset = getOffset(register);
+                            }
                             toAddPut(line + 1, new ObjStoreInstr(StoreType.SW, Register.get$k0(), Register.get$sp(), curOffset, true));
                         }
                         register.setRealRegister(Register.get$k0().getRealRegister());

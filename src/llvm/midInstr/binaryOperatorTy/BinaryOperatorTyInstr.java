@@ -97,7 +97,7 @@ public class BinaryOperatorTyInstr extends MidInstr {
                     new ObjLiInstr(ans, constant1 - constant2);
                 } else if (constant1 != null) {
                     rs = new Register(VirtualRegister.getVirtualRegister().getRegister());
-                    MipsBuilder.getMipsBuilder().addRegisterAllocation(operand2, rs);
+                    MipsBuilder.getMipsBuilder().addRegisterAllocation(operand1, rs);
                     new ObjLiInstr(rs, constant1);
                     new ObjRRCalculateInstr(RRCalculateType.SUBU, ans, rs, rt);
                 } else if (constant2 != null) {

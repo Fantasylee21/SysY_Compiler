@@ -94,12 +94,9 @@ public class BasicBlock extends Value {
     }
 
     public void generateMips() {
-        ObjBlock objBlock = new ObjBlock(name);
-        MipsBuilder.getMipsBuilder().getCurrentFunction().enterBlock(objBlock);
         for (MidInstr instr : instructions) {
             instr.generateMips();
         }
-        MipsBuilder.getMipsBuilder().getCurrentFunction().exitBlock();
     }
 
     public void setDefUse() {

@@ -13,10 +13,12 @@ public class MidOptimize {
         DelDeadCode delDeadCode = new DelDeadCode(module);
         Mem2Reg mem2Reg = new Mem2Reg(module);
         RemovePhi removePhi = new RemovePhi(module);
+        UpdateBlock updateBlock = new UpdateBlock(module);
         delDeadBlock.run();
         delDeadCode.run();
         blockRelationBuilder.run();
         mem2Reg.run();
         removePhi.run();
+        updateBlock.run();
     }
 }

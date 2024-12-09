@@ -148,6 +148,9 @@ public class VarDecl extends Node {
                                 }
                             }
                             instr = new StoreInstr(null, value ,instr);
+                        } else {
+                            // TODO
+                            instr = new StoreInstr(null, new Constant(0), instr);
                         }
                     } else if (symbol instanceof ArraySymbol arraySymbol) {
                         MidInstr instr = new AllocaInstr(LLVMBuilder.getLlvmBuilder().getVarName(), new ArrayType(llvmType, arraySymbol.getSize()));

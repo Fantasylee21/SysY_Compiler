@@ -91,8 +91,8 @@ public class GetElementPtrInstr extends MidInstr {
 //            if (ansType.getType() == LLVMEnumType.Int8Type && isGlobalVariable()) {
 //                new ObjRRCalculateInstr(RRCalculateType.ADD, ans, pointer, offset);
 //            } else {
-                new ObjRICalculate(RICalculateType.SLL, offset, offset, 2);
-                new ObjRRCalculateInstr(RRCalculateType.ADDU, ans, pointer, offset);
+                new ObjRICalculate(RICalculateType.SLL, Register.get$v1(), offset, 2);
+                new ObjRRCalculateInstr(RRCalculateType.ADDU, ans, pointer, Register.get$v1());
 //            }
         }
 

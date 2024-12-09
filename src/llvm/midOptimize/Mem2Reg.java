@@ -83,6 +83,9 @@ public class Mem2Reg {
         while (instrIterator.hasNext()) {
             MidInstr instr = instrIterator.next();
             if (instr instanceof LoadInstr && useInstructions.contains(instr)) {
+                if (stack.isEmpty() || stack.peek() == null) {
+                    continue;
+                }
                 instr.replaceAllUsesWith(stack.peek());
                 instrIterator.remove();
             } else if (instr instanceof StoreInstr && defInstructions.contains(instr)) {
