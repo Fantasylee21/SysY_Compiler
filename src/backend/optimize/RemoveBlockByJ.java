@@ -9,6 +9,7 @@ import backend.objInstr.jump.JumpType;
 import backend.objInstr.jump.ObjJumpInstr;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 public class RemoveBlockByJ {
@@ -30,8 +31,19 @@ public class RemoveBlockByJ {
         while (iterator.hasNext()) {
             ObjBlock objBlock = iterator.next();
             if (objBlock.getInstructions().size() == 1 && objBlock.getInstructions().get(0) instanceof ObjJumpInstr objJumpInstr && objJumpInstr.getJumpType() == JumpType.J) {
-                String label = objJumpInstr.getLabel();
-                labelMap.put(objBlock.getName(), label);
+                String endLabel= objJumpInstr.getLabel();
+                String startLabel = objBlock.getName();
+                labelMap.put(startLabel, endLabel);
+                for (String label : labelMap.keySet()) {
+                    if (labelMap.get(label).equals(startLabel)) {
+                        labelMap.put(label, endLabel);
+                    }
+                }
+                for (String label : labelMap.keySet()) {
+                    if (label.equals(endLabel)) {
+                        labelMap.put(startLabel, labelMap.get(label));
+                    }
+                }
                 iterator.remove();
             }
         }

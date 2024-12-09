@@ -5,7 +5,6 @@ import backend.objInstr.ObjLaInstr;
 import backend.objInstr.ObjLiInstr;
 import backend.objInstr.ObjMoveInstr;
 import backend.objInstr.branch.ObjBranchInstr;
-import backend.objInstr.dm.DmType;
 import backend.objInstr.dm.ObjDmInstr;
 import backend.objInstr.load.ObjLoadInstr;
 import backend.objInstr.move.MoveType;
@@ -350,6 +349,21 @@ public class ObjFunction {
             if (activeMap.get(register.toString()).contains(suc)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public boolean NoConflict(String register, ObjBlock block) {
+        //找到block的下一个
+        ObjBlock next = null;
+        int index = blocks.indexOf(block);
+        if (index < blocks.size() - 1) {
+            next = blocks.get(index + 1);
+        } else {
+            return true;
+        }
+        if (block.getOut().contains(register) && next.getIn().contains(register)) {
+            return true;
         }
         return false;
     }
