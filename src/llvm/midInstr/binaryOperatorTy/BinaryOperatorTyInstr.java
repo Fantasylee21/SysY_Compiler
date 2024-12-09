@@ -132,15 +132,24 @@ public class BinaryOperatorTyInstr extends MidInstr {
                 if (constant1 != null && constant2 != null) {
                     new ObjLiInstr(ans, constant1 * constant2);
                 } else if (constant1 != null) {
-                    rs = new Register(VirtualRegister.getVirtualRegister().getRegister());
-                    new ObjLiInstr(rs, constant1);
-                    new ObjDmInstr(DmType.MULT, rs, rt);
-                    new ObjMoveHLInstr(MoveType.MFLO, ans);
+//                    如果constant1可以被2的幂整除
+                    if ((constant1 & (constant1 - 1)) == 0) {
+                        new ObjRICalculate(RICalculateType.SLL, ans, rt, Integer.numberOfTrailingZeros(constant1));
+                    } else {
+                        rs = new Register(VirtualRegister.getVirtualRegister().getRegister());
+                        new ObjLiInstr(rs, constant1);
+                        new ObjDmInstr(DmType.MULT, rs, rt);
+                        new ObjMoveHLInstr(MoveType.MFLO, ans);
+                    }
                 } else if (constant2 != null) {
-                    rt = new Register(VirtualRegister.getVirtualRegister().getRegister());
-                    new ObjLiInstr(rt, constant2);
-                    new ObjDmInstr(DmType.MULT, rs, rt);
-                    new ObjMoveHLInstr(MoveType.MFLO, ans);
+                    if ((constant2 & (constant2 - 1)) == 0) {
+                        new ObjRICalculate(RICalculateType.SLL, ans, rs, Integer.numberOfTrailingZeros(constant2));
+                    } else {
+                        rt = new Register(VirtualRegister.getVirtualRegister().getRegister());
+                        new ObjLiInstr(rt, constant2);
+                        new ObjDmInstr(DmType.MULT, rs, rt);
+                        new ObjMoveHLInstr(MoveType.MFLO, ans);
+                    }
                 } else {
                     new ObjDmInstr(DmType.MULT, rs, rt);
                     new ObjMoveHLInstr(MoveType.MFLO, ans);
