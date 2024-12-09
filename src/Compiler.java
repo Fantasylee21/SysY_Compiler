@@ -72,6 +72,9 @@ public class Compiler {
         for (Integer key : errors.keySet()) {
             System.out.println(key + " " + errors.get(key));
         }
+        if (!errors.isEmpty()) {
+            return;
+        }
 
         root.generateIR();
         //重定向输出到IR.txt
