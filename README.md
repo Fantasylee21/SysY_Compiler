@@ -10,6 +10,41 @@
 - 中端：LLVM IR代码优化，做了死代码删除（未使用的函数、不可达块、不可达函数）、Mem2Reg
 - 后端：活跃变量分析、寄存器分配
 
+代码结构如下：
+
+```java
+├─backend
+│  ├─objInstr //各类目标代码
+│  │  ├─branch
+│  │  ├─dm
+│  │  ├─global
+│  │  ├─jump
+│  │  ├─load
+│  │  ├─move
+│  │  ├─riCalculate
+│  │  ├─rrCalculate
+│  │  └─store
+│  ├─optimize //后端优化
+│  └─register //后端实际寄存器相关
+├─frontend
+│  ├─AST
+│  │  └─SyntaxComponent // 语法树组成部分
+│  ├─Error //各类错误
+│  ├─Symbol //各类符号表
+│  └─Token //token相关
+└─llvm
+    ├─initial //value的各类初始值
+    ├─midInstr //各类中间代码
+    │  ├─binaryOperatorTy
+    │  ├─icmp
+    │  └─io
+    ├─midOptimize //中间代码优化
+    └─type //llvm value的类型
+
+```
+
+具体结构见附录
+
 整体代码架构如下在Compile.java即可看出各部分的接口
 
 ```java
@@ -364,7 +399,7 @@ public AllocaInstr(String name, LLVMType targetType) {
 我实现了LLVMBuilder类，主要用于生成变量名、为当前Function生成BasicBlock，为当前BasicBlock生MidInstr。
 
 ```java
- private static final LLVMBuilder llvmBuilder = new LLVMBuilder();
+private static final LLVMBuilder llvmBuilder = new LLVMBuilder();
 private static int registerCounter = 0; // 虚拟寄存器编号
 private static int printStringCounter = 0; // 输出字符编号
 private static int branchCounter = 0; // 分支名编号
@@ -380,7 +415,21 @@ private Stack<Loop> loopStack;
 
 ![for](img/for.png)
 
-针对这张图，需要针对每个创建BasicBlock和对每个Block生成mips，同时需要记录
+针对这张图，需要针对每个创建BasicBlock和对每个Block生成mips，同时需要记录,在最开始，我采用纯数字对分支名进行编号时为了保证其顺序，再加入后又对其进行了删除，从而使得后续编号在这些block后面，也保证了Block的出现符合逻辑
+
+```java
+                BasicBlock condBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getBranchName());
+                BasicBlock bodyBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getBranchName());
+                BasicBlock updateBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getBranchName());
+                BasicBlock exitBlock = new BasicBlock(LLVMBuilder.getLlvmBuilder().getBranchName());
+
+                LLVMBuilder.getLlvmBuilder().getLoopStack().push(new Loop(condBlock, bodyBlock, updateBlock, exitBlock));
+
+                LLVMBuilder.getLlvmBuilder().removeBasicBlock(bodyBlock.getName());
+                LLVMBuilder.getLlvmBuilder().removeBasicBlock(updateBlock.getName());
+                LLVMBuilder.getLlvmBuilder().removeBasicBlock(exitBlock.getName());
+
+```
 
 
 
@@ -400,9 +449,7 @@ llvm-link out.ll lib.ll -S -o out.ll
 lli out.ll < in.txt
 ```
 
-### 后端
-
-#### 生成Mips代码
+### 后端生成Mips代码
 
 做完中间代码生成后，我做了无优化版本的mips代码生成，由于我采用的是先生成虚拟寄存器，这部分的难点在于栈帧的分配，我的栈帧分配如下：
 
@@ -424,19 +471,469 @@ lli out.ll < in.txt
 
 由于某些原因，我没有采用任何对齐，所有的值均按照四字节存储
 
-- para区：存放当前函数调用其他函数的实参，我并没有将\$a0这些进行存储，大小为该函数调用的所有$(函数参数的最大值-4)* 4$，这样可以方便被调用函数获取实参，只需要原来偏移量加上当前函数的大小fSize
+- para区：存放当前函数调用其他函数的实参，我并没有将\$a0-\$a3这些进行存储，但是为其开辟了空间，尽管最后也没有使用到，大小为该函数调用的所有$(函数参数的最大值)* 4$，这样可以方便被调用函数获取实参，只需要原来偏移量加上当前函数的大小fSize
 - ra：存放函数返回值$ra
 - sava保留区：存放函数调用时需要存起来的寄存器，大小由我分配的全局寄存器数目决定
 - local：本地值的存放处，如alloca指令
-- ext扩展区：存放后续保留中间计算结果的位置
+- ext扩展区：存放后续保留中间计算结果的位置，例如，没有空闲寄存器时我们需要将计算结果保存在内存里，那么这篇区域就成了我们保存的对象
 
 弄清上述东西花费了我大部分时间，接下来就是和llvm代码一样，对所有MidInstr实现`generateMips`方法进行翻译，并用`MipsBuilder`类实现指令添加、生成虚拟寄存器、计算栈帧偏移量
 
-我的第一遍仅仅分了.text和.data段用于存放各类目标代码，然后遍历代码，分配`$t0`和`$t1`寄存器
+#### 无优化版本
+
+我的第一遍仅仅分了.text和.data段用于存放各类目标代码，然后遍历代码，分配`$t0`和`$t1`寄存器，没有为目标代码分配，后端的代码结构较为简单，没有实现后续使用的`ObjModule`,`ObjFunction`,`ObjBlock`这些类。
+
+分配寄存器采用的方式较为暴力，遍历所有指令进行相应的指令插入和函数开头的`$sp`相关偏移量计算
+
+```java
+    public void allocateRegister() {
+        int funCount = 0;
+        String funcName = "";
+        for (ObjInstr instr : textSegment) {
+            int a = 1;
+            if (instr instanceof ObjCommentInstr) {
+                if (((ObjCommentInstr) instr).getComment().startsWith("enter function")) {
+                    if (funCount != 0) {
+                        Fun2Offset.put(funcName, curOffset);
+                    }
+                    funcName = ((ObjCommentInstr) instr).getComment().substring(15);
+                    funCount++;
+                    curOffset = Fun2Offset.get(funcName);
+                }
+            } else if 
+             /*
+                省略一堆else if
+             */
+               
+            else if (instr instanceof ObjLiInstr) {
+                Register target = ((ObjLiInstr) instr).getTarget();
+                if (!target.isRealRegister()) {
+                    toAddPut(textSegment.indexOf(instr) + 1, new ObjStoreInstr(StoreType.SW, Register.get$t0(), Register.get$sp(), curOffset, true));
+                    frame.put(curOffset, target.getVirtualReg());
+                    addStackFrameValue(Register.get$t0());
+                    target.setRealRegister(RealRegister.T0);
+                }
+            }
+        }
+        Fun2Offset.put(funcName, curOffset);
+        for (int i = toAdd.size() - 1; i >= 0; i--) {
+            for (Integer index : toAdd.get(i).keySet()) {
+                textSegment.add(index, toAdd.get(i).get(index));
+            }
+        }
+        toAdd.clear();
+    }
+```
+
+这部分的难点主要在以下两点
+
+1. 认识到破坏\$a0,\$a1,\$a2,\$a3的行为：
+
+   - 系统调用
+
+   - 函数调用
+2. 如何找到对应虚拟寄存器在内存中的位置——采用HashMap对其进行实时更新
+
+最后竞速结果如下
+
+![grade1](img/grade1.png)
+
+#### 优化版本
+
+##### 后端优化
+
+###### 寄存器分配
+
+由于只有两个寄存器着实影响效率，所以寄存器分配是我最先做的部分，最开始研究了图着色算法，其构建图的过程过于繁琐，对于时间不多的我来说可谓雪上加霜，于是我用了线性分配，主要参考这篇文章：
+
+https://www.cnblogs.com/AANA/p/16315921.html
+
+核心思路就是创建寄存器池，并根据变量的活跃区间进行寄存器的分配和释放
+
+|      |    active intervals    | available registers | spilled intervals |   allocation results   |
+| ---- | :--------------------: | :-----------------: | :---------------: | :--------------------: |
+| 初始 |          {}{}          |   {r1,r2}{r1,r2}    |       {}{}        |          {}{}          |
+| A    |      {A=r1}{A=r1}      |      {r2}{r2}       |       {}{}        |          {}{}          |
+| B    | {A=r1,B=r2}{A=r1,B=r2} |        {}{}         |       {}{}        |          {}{}          |
+| C    | {A=r1,B=r2}{A=r1,B=r2} |        {}{}         |      {C}{C}       |          {}{}          |
+| D    | {D=r1,B=r2}{D=r1,B=r2} |        {}{}         |      {C}{C}       |      {A=r1}{A=r1}      |
+| E    | {D=r1,E=r2}{D=r1,E=r2} |        {}{}         |      {C}{C}       | {A=r1,B=r2}{A=r1,B=r2} |
+| 结束 |          {}{}          |   {r1,r2}{r1,r2}    |      {C}{C}       | {A=r1,B=r2,D=r1,E=r2}  |
+
+活跃区间如下：
+
+![activeTime](img/activeTime.png)
+
+###### 变量活跃分析和CFG流图构建
+
+在进行寄存器分配前需要进行活跃变量分析，由于CFG图在中端已经生成，这里要做的其实只有根据中端生成的重新构建一下即可
+
+```java
+public void BuildCFG() {
+        HashMap<BasicBlock, ArrayList<BasicBlock>> preMap = llvmFunction.getPreMap();
+        HashMap<BasicBlock, ArrayList<BasicBlock>> sucMap = llvmFunction.getSucMap();
+        for (BasicBlock block : preMap.keySet()) {
+            //……
+        }
+        for (BasicBlock block : sucMap.keySet()) {
+            //……
+        }
+    }
+```
+
+**活跃变量分析**
+
+根据编译理论里的公式即可
+$$
+out[B] =  \cup _{B的所有后继} in[B]
+\\
+in[B] = use[B] \cup (out[B] - def[B])
+$$
+
+```java
+ while (changed) {
+            changed = false;
+            for (int i = blocks.size() - 1; i >= 0; i--) {
+                ObjBlock bb = blocks.get(i);
+                HashSet<String> newOut = new HashSet<>();
+//                out = U后继(in)
+                for (ObjBlock succ : bb.getSuccessors()) {
+                    newOut.addAll(inMap.get(succ));
+                    outMap.put(bb, newOut);
+                }
+//                in = (out - def) + use
+                HashSet<String> newIn = new HashSet<>(newOut);
+                newIn.removeAll(bb.getDef());
+                newIn.addAll(bb.getUse());
+                if (!newIn.equals(inMap.get(bb))) {
+                    changed = true;
+                    inMap.put(bb, newIn);
+                }
+            }
+        }
+```
+
+###### 删除非活跃变量
+
+这个的优化效果不佳，建议还是建议在中端根据def-use的数据流进行删除死代码，思路也比较简单：根据目标代码是否存在活跃区间进行删除，下面以rr类型指令为例
+
+```java
+else if (instr instanceof ObjRRCalculateInstr objRRCalculateInstr) {
+    Register rd = objRRCalculateInstr.getRd();
+    if (!activeMap.containsKey(rd.toString()) && !rd.isRealRegister()) {
+        iterator.remove();
+    }
+}
+```
+
+###### 删除只有j指令的ObjBlock
+
+针对包含label的指令执行dfs
+
+```java
+public String dfs(ObjFunction objFunction, ObjBlock objBlock, HashSet<ObjBlock> removeBlocks, String label) {
+        ObjBlock nextBlock = objFunction.getBlockByLabel(label);
+        if (nextBlock == null) {
+            return label;
+        }
+        if (nextBlock.getInstructions().size() == 1 && nextBlock.getInstructions().get(0) instanceof ObjJumpInstr objJumpInstr && objJumpInstr.getJumpType() == JumpType.J) {
+            removeBlocks.add(nextBlock);
+            return dfs(objFunction, nextBlock, removeBlocks, objJumpInstr.getLabel());
+        } else {
+            return label;
+        }
+    }
+```
+
+##### 中端优化
+
+做完寄存器分配后，竞速排序的结果相比原来快了很多
+
+![grade2](img/grade2.png)
+
+###### 消除不可达块
+
+通过branch指令和jump指令对所有块进行dfs，记录下不可达块并对其进行删除
+
+```java
+public void dfsBlock(BasicBlock block, HashSet<BasicBlock> visited) {
+        visited.add(block);
+        MidInstr lastInstr = block.getInstructions().get(block.getInstructions().size() - 1);
+        if (lastInstr instanceof BrInstr) {
+            BasicBlock thenBlock = (BasicBlock) ((BrInstr) lastInstr).getOperands().get(1);
+            BasicBlock elseBlock = (BasicBlock) ((BrInstr) lastInstr).getOperands().get(2);
+            if (!visited.contains(thenBlock)) {
+                dfsBlock(thenBlock, visited);
+            }
+            if (!visited.contains(elseBlock)) {
+                dfsBlock(elseBlock, visited);
+            }
+        } else if (lastInstr instanceof JumpInstr jumpInstr) {
+            BasicBlock targetBlock = (BasicBlock) jumpInstr.getOperands().get(0);
+            if (!visited.contains(targetBlock)) {
+                dfsBlock(targetBlock, visited);
+            }
+        }
+    }
+```
+
+###### 消除死代码
+
+根据Use进行删除，没有use的指令直接删除
+
+```java
+ MidInstr instr = instrIterator.next();
+if (canBeUse(instr) && instr.getUseList().isEmpty()) {
+    instrIterator.remove();
+}
+```
+
+###### 乘除法优化
+
+在生成mips时做的优化，做的比较简单，对参与计算的value进行特判
+
+```java
+if (constant1 != null && constant2 != null) {
+    new ObjLiInstr(ans, constant1 * constant2);
+} else if (constant1 != null) {
+    //                    如果constant1可以被2的幂整除
+    if ((constant1 & (constant1 - 1)) == 0) {
+        new ObjRICalculate(RICalculateType.SLL, ans, rt, Integer.numberOfTrailingZeros(constant1));
+    } else {
+        rs = new Register(VirtualRegister.getVirtualRegister().getRegister());
+        new ObjLiInstr(rs, constant1);
+        new ObjDmInstr(DmType.MULT, rs, rt);
+        new ObjMoveHLInstr(MoveType.MFLO, ans);
+    }
+} else if (constant2 != null) {
+    if ((constant2 & (constant2 - 1)) == 0) {
+        new ObjRICalculate(RICalculateType.SLL, ans, rs, Integer.numberOfTrailingZeros(constant2));
+    } else {
+        rt = new Register(VirtualRegister.getVirtualRegister().getRegister());
+        new ObjLiInstr(rt, constant2);
+        new ObjDmInstr(DmType.MULT, rs, rt);
+        new ObjMoveHLInstr(MoveType.MFLO, ans);
+    }
+} else {
+    new ObjDmInstr(DmType.MULT, rs, rt);
+    new ObjMoveHLInstr(MoveType.MFLO, ans);
+}
+```
 
 
 
-破坏\$a0,\$a1,\$a2,\$a3的行为：
+###### Mem2Reg
 
-1. 系统调用
-2. 函数调用
+这部分是中端优化的主要部分
+
+
+
+### 附录
+
+#### 代码结构
+
+```java
+│-Compiler.java
+│-config.json
+│
+├─backend
+│  │  BackOptimize.java
+│  │  MipsBuilder.java
+│  │  ObjBlock.java
+│  │  ObjFunction.java
+│  │  ObjModule.java
+│  │
+│  ├─objInstr
+│  │  │  ObjCommentInstr.java
+│  │  │  ObjInstr.java
+│  │  │  ObjJRInstr.java
+│  │  │  ObjLabelInstr.java
+│  │  │  ObjLaInstr.java
+│  │  │  ObjLiInstr.java
+│  │  │  ObjMoveInstr.java
+│  │  │  ObjNopInstr.java
+│  │  │  ObjSyscallInstr.java
+│  │  │
+│  │  ├─branch
+│  │  │      BranchType.java
+│  │  │      ObjBranchInstr.java
+│  │  │
+│  │  ├─dm
+│  │  │      DmType.java
+│  │  │      ObjDmInstr.java
+│  │  │
+│  │  ├─global
+│  │  │      ObjAsciizInstr.java
+│  │  │      ObjByteInstr.java
+│  │  │      ObjSpaceInstr.java
+│  │  │      ObjWordInstr.java
+│  │  │
+│  │  ├─jump
+│  │  │      JumpType.java
+│  │  │      ObjJumpInstr.java
+│  │  │
+│  │  ├─load
+│  │  │      LoadType.java
+│  │  │      ObjLoadInstr.java
+│  │  │
+│  │  ├─move
+│  │  │      MoveType.java
+│  │  │      ObjMoveHLInstr.java
+│  │  │
+│  │  ├─riCalculate
+│  │  │      ObjRICalculate.java
+│  │  │      RICalculateType.java
+│  │  │
+│  │  ├─rrCalculate
+│  │  │      ObjRRCalculateInstr.java
+│  │  │      RRCalculateType.java
+│  │  │
+│  │  └─store
+│  │          ObjStoreInstr.java
+│  │          StoreType.java
+│  │
+│  ├─optimize
+│  │      RegAllocator.java
+│  │      RemoveBlockByJ.java
+│  │
+│  └─register
+│          RealRegister.java
+│          Register.java
+│          VirtualRegister.java
+│
+├─frontend
+│  │  Lexer.java
+│  │  Parser.java
+│  │  SymbolManager.java
+│  │
+│  ├─AST
+│  │  │  ExpValueType.java
+│  │  │  Node.java
+│  │  │  SyntaxType.java
+│  │  │
+│  │  └─SyntaxComponent
+│  │          AddExp.java
+│  │          Block.java
+│  │          Character.java
+│  │          CompUnit.java
+│  │          Cond.java
+│  │          ConstDecl.java
+│  │          ConstDef.java
+│  │          ConstExp.java
+│  │          ConstInitVal.java
+│  │          EqExp.java
+│  │          Exp.java
+│  │          ForStmt.java
+│  │          FuncDef.java
+│  │          FuncFParam.java
+│  │          FuncFParams.java
+│  │          FuncRParams.java
+│  │          FuncType.java
+│  │          InitVal.java
+│  │          LAndExp.java
+│  │          LOrExp.java
+│  │          LVal.java
+│  │          MainFuncDef.java
+│  │          MulExp.java
+│  │          Number.java
+│  │          PrimaryExp.java
+│  │          RelExp.java
+│  │          Stmt.java
+│  │          TokenNode.java
+│  │          UnaryExp.java
+│  │          UnaryOp.java
+│  │          VarDecl.java
+│  │          VarDef.java
+│  │
+│  ├─Error
+│  │      Error.java
+│  │      LexerErrors.java
+│  │      ParserErrors.java
+│  │      SymbolErrors.java
+│  │
+│  ├─Symbol
+│  │      ArraySymbol.java
+│  │      ConstArraySymbol.java
+│  │      ConstVarSymbol.java
+│  │      FuncSymbol.java
+│  │      Symbol.java
+│  │      SymbolTable.java
+│  │      ValueType.java
+│  │      VarSymbol.java
+│  │
+│  └─Token
+│          Token.java
+│          TokenType.java
+│
+└─llvm
+    │  BasicBlock.java
+    │  Constant.java
+    │  Function.java
+    │  GlobalValue.java
+    │  GlobalVariable.java
+    │  LLVMBuilder.java
+    │  Loop.java
+    │  Module.java
+    │  PrintString.java
+    │  Use.java
+    │  User.java
+    │  Value.java
+    │
+    ├─initial
+    │      ArrayInitial.java
+    │      Initial.java
+    │      VarInitial.java
+    │
+    ├─midInstr
+    │  │  AllocaInstr.java
+    │  │  BrInstr.java
+    │  │  CallInstr.java
+    │  │  GetElementPtrInstr.java
+    │  │  JumpInstr.java
+    │  │  LoadInstr.java
+    │  │  MidInstr.java
+    │  │  MidInstrType.java
+    │  │  MoveInstr.java
+    │  │  PCopyInstr.java
+    │  │  PhiInstr.java
+    │  │  RetInstr.java
+    │  │  StoreInstr.java
+    │  │  TruncInstr.java
+    │  │  ZextInstr.java
+    │  │
+    │  ├─binaryOperatorTy
+    │  │      BinaryOp.java
+    │  │      BinaryOperatorTyInstr.java
+    │  │
+    │  ├─icmp
+    │  │      IcmpInstr.java
+    │  │      IcmpOp.java
+    │  │
+    │  └─io
+    │          GetCharInstr.java
+    │          GetIntInstr.java
+    │          PutChInstr.java
+    │          PutIntInstr.java
+    │          PutStrInstr.java
+    │
+    ├─midOptimize
+    │      BlockRelationBuilder.java
+    │      DelDeadBlock.java
+    │      DelDeadCode.java
+    │      Mem2Reg.java
+    │      MidOptimize.java
+    │      RemovePhi.java
+    │      UpdateBlock.java
+    │
+    └─type
+            ArrayType.java
+            BoolType.java
+            Int32Type.java
+            Int8Type.java
+            LLVMEnumType.java
+            LLVMType.java
+            OtherType.java
+            PointerType.java
+            VoidType.java
+```
+

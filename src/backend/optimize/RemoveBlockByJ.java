@@ -21,7 +21,7 @@ public class RemoveBlockByJ {
 
     public void run() {
         for (ObjFunction objFunction : objModule.getFunctions()) {
-            removeBlockByJ(objFunction);
+            RemoveSingleJ(objFunction);
         }
     }
 
@@ -61,6 +61,35 @@ public class RemoveBlockByJ {
                     }
                 }
             }
+        }
+    }
+
+    public void RemoveSingleJ(ObjFunction objFunction) {
+        HashSet<ObjBlock> removeBlocks = new HashSet<>();
+        for (ObjBlock objBlock : objFunction.getBlocks()) {
+            for (ObjInstr objInstr : objBlock.getInstructions()) {
+                if (objInstr instanceof ObjJumpInstr objJumpInstr && objJumpInstr.getJumpType() == JumpType.J) {
+                    String label = dfs(objFunction, objBlock, removeBlocks, objJumpInstr.getLabel());
+                    objJumpInstr.setLabel(label);
+                } else if (objInstr instanceof ObjBranchInstr objBranchInstr) {
+                    String label = dfs(objFunction, objBlock, removeBlocks, objBranchInstr.getLabel());
+                    objBranchInstr.setLabel(label);
+                }
+            }
+        }
+        objFunction.getBlocks().removeAll(removeBlocks);
+    }
+
+    public String dfs(ObjFunction objFunction, ObjBlock objBlock, HashSet<ObjBlock> removeBlocks, String label) {
+        ObjBlock nextBlock = objFunction.getBlockByLabel(label);
+        if (nextBlock == null) {
+            return label;
+        }
+        if (nextBlock.getInstructions().size() == 1 && nextBlock.getInstructions().get(0) instanceof ObjJumpInstr objJumpInstr && objJumpInstr.getJumpType() == JumpType.J) {
+            removeBlocks.add(nextBlock);
+            return dfs(objFunction, nextBlock, removeBlocks, objJumpInstr.getLabel());
+        } else {
+            return label;
         }
     }
 }

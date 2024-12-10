@@ -375,4 +375,13 @@ public class ObjFunction {
     public HashMap<String, Integer> getActiveStart() {
         return activeStart;
     }
+
+    public ObjBlock getBlockByLabel(String label) {
+        for (ObjBlock block : blocks) {
+            if (block.getName().equals(label)) {
+                return block;
+            }
+        }
+        return null;
+    }
 }
