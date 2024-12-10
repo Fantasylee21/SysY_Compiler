@@ -239,7 +239,7 @@ public void lexerIn(String input) {
 
 这部分主要参考陈学长递归下降子程序和OO作业的思路，实现不是很难，重点还是熟悉文法
 
-- 第一步，毫无疑问、根据理论课消除左递归
+- 第一步，毫无疑问、根据理论课所学消除左递归
 
 - 第二步，构造各个语法单元的类，其都继承`Node`类
 
@@ -431,7 +431,14 @@ private Stack<Loop> loopStack;
 
 ```
 
+#### 后期修改
 
+由于前期对getElementPtr指令的理解有误，导致一些数据类型错误，后面我找了相关定义GetElementPtr指令是一条指针计算语句，本身并不进行任何数据的访问或修改，只进行指针的计算。使用语法如下：
+
+```java
+<result> = getelementptr <ty>, <ty>* <ptrval>{, [inrange] <ty> <idx>}*
+<result> = getelementptr <ty>, <ptr vector> <ptrval>, [inrange] <vector index type> <idx>
+```
 
 **小结**
 
@@ -563,6 +570,13 @@ https://www.cnblogs.com/AANA/p/16315921.html
 活跃区间如下：
 
 ![activeTime](img/activeTime.png)
+
+我做的活跃区间是按照行数进行，判断当前行数是否是该虚拟寄存器可以释放
+
+1. 在循环中的虚拟寄存器，在块结束统一判断
+2. 不在循环中，直接更新endline
+
+
 
 ###### 变量活跃分析和CFG流图构建
 
@@ -724,7 +738,128 @@ if (constant1 != null && constant2 != null) {
 
 ###### Mem2Reg
 
-这部分是中端优化的主要部分
+**准备工作**
+
+这部分是中端优化的主要部分包含构建支配图和支配边界，我们需要根据基本块之间的跳转关系构建出控制流图、支配树，并计算出每个节点的支配边界。这部分主要参考[Petrichor/src/mid_end/CFGBuilder.java at master · Hyggge/Petrichor](https://github.com/Hyggge/Petrichor/blob/master/src/mid_end/CFGBuilder.java)，架构确实好！！
+
+```java
+public void run() {
+        for (Function function : module.getFunctions()) {
+            init(function);
+            buildCFG(function);
+            buildDominator(function);
+            buildImmDominator(function);
+            buildDF(function);
+            for (BasicBlock basicBlock : function.getBasicBlocks()) {
+                basicBlock.setDefUse();
+            }
+        }
+    }
+```
+
+**插入phi**
+
+找出需要添加phi指令的基本块，并添加phi，插入算法
+
+![insertPhi](img/insertPhi.png)
+
+```java
+public void insertPhi() {
+        HashSet<BasicBlock> F = new HashSet<>();
+        Stack<BasicBlock> W = new Stack<>();
+        for (BasicBlock block : defBlocks) {
+            W.push(block);
+        }
+        while (!W.isEmpty()) {
+            BasicBlock X = W.pop();
+            for (BasicBlock Y : X.getDominanceFrontiers()) {
+                if (!F.contains(Y)) {
+                    generatePhi(Y);
+                    F.add(Y);
+                    if (!defBlocks.contains(Y)) {
+                        W.push(Y);
+                    }
+                }
+            }
+        }
+    }
+```
+
+随后通过DFS进行重命名，同时将相关的alloca, store,load这些内存指令删除，
+
+前序遍历支配树，对于每个基本块，顺序指令
+
+- 如果遇到了alloca指令，记录下alloca的指针名，为该指针建立一个空堆栈，删除该指令
+- 如果遇到了store指令，将需要写入内存的Value压入指针对应的堆栈，删除该指令
+- 如果遇到了load指令，那么将所有使用该load指令对应Value的指令，改为使用指针对应堆栈的栈顶Value，删除该指令
+- 如果遇到了phi指令，则将该指令对应的Value压入指针对应的堆栈。
+
+每次结束后需要对phi指令加上选项以及将堆栈中新加入的弹出
+
+**删除phi**
+
+这部分由于后续分配寄存器的原因我不太想放在后端做，所以我在中端引入了move指令（llvm实际没有）
+
+```java
+public void run() {
+    for (Function function : module.getFunctions()) {
+        Phi2PCopy(function);
+        RemovePhi2Move(function);
+    }
+}
+```
+
+这里要做的就是将phi指令变为pcopy指令，而pcopy指令就是一堆并行move指令的集合（所以这里重点就是如何让把实际并行的指令在并行执行下不会出错和正确放置pcopy指令），大致步骤如下：
+
+1. `Phi2Pcopy`：将phi指令转化为Pcopy指令，针对某一ObjBlock，遍历其前前继，分析其前继B的后继数目
+
+   - 如果B的后继数目为1，直接将Pcopy指令插在B的跳转指令前
+   - 反之，需要新建一个ObjBlock过渡，并在这里块内插入Pcopy指令
+
+   最后根据phi指令进行Pcopy指令的修改
+
+2. `RemovePhi2Move`：将Pcopy指令转换为一堆move指令——遍历寻找Pcopy指令即可，针对冲突指令，我采用HashMap解决，通过增加中间变量的Move指令解决
+
+```java
+// 并行指令检查冲突赋值——某一dst在后面的src中出现
+HashMap<Value, Value> conflict = new HashMap<>();
+for (int i = 0; i < moveInstrs.size(); i++) {
+    for (int j = i + 1; j < moveInstrs.size(); j++) {
+        if (moveInstrs.get(i).getOperands().get(0).equals(moveInstrs.get(j).getOperands().get(1)) && !conflict.containsKey(moveInstrs.get(i).getOperands().get(0))) {
+            conflict.put(moveInstrs.get(i).getOperands().get(0), new Value(Int32Type.getInstance(), LLVMBuilder.getLlvmBuilder().getVarName()));
+        }
+    }
+}
+for (Value value : conflict.keySet()) {
+    moveInstrs.add(0, new MoveInstr(conflict.get(value), value));
+    for (int i = 0; i < dsts.size(); i++) {
+        if (dsts.get(i).equals(value)) {
+            dsts.set(i, conflict.get(value));
+        }
+    }
+}
+```
+
+#### 总结
+
+最终版优化结果如下：
+
+![grade3](img/grade3.png)
+
+总的来说寄存器分配活跃区间的计算还可以进一步优化，按照我的写法，活跃区间只有一段，代码过长时，寄存器不太够用，后续考虑可以分为多段进行，当然最优还是图着色算法。
+
+就评测点而言，mem2Reg和寄存器分配是降低总的circle最有效的优化，也是花费时间最长的两个优化。
+
+编译全过程中总体来说架构较好，中间一次重构是从无优化版本到完成寄存器版本的优化对后端代码进行了优化，使得后端代码结构尽可能贴近中端。
+
+
+
+### 参考
+
+1. [Hyggge/Petrichor: Java 实现的 SysY - LLVM IR 编译器](https://github.com/Hyggge/Petrichor)
+2. [Thysrael/Pansy: 一个简单的编译 SysY 语言（C 语言子集）到 Mips 的编译器，采用 Java 实现。](https://github.com/Thysrael/Pansy)
+3. https://www.cnblogs.com/AANA/p/16315921.html
+4. [educg-net-12619-928705 / Compiler2022-MeowCompiler · GitLab](https://gitlab.eduxiji.net/educg-group-12619-928705/compiler2022-meowcompiler)
 
 
 
