@@ -202,6 +202,18 @@ public class ObjFunction {
                 }
                 activeMap.get(register).add(bb);
             }
+            for (String register : bb.getUse()) {
+                if (!activeMap.containsKey(register)) {
+                    activeMap.put(register, new HashSet<>());
+                }
+                activeMap.get(register).add(bb);
+            }
+            for (String register : bb.getDef()) {
+                if (!activeMap.containsKey(register)) {
+                    activeMap.put(register, new HashSet<>());
+                }
+                activeMap.get(register).add(bb);
+            }
         }
 
 //        for (String register : activeMap.keySet()) {
@@ -268,17 +280,27 @@ public class ObjFunction {
         removeUnliveCode();
         int line = 0;
         for (ObjBlock block : blocks) {
-            for (ObjInstr instr : block.getInstructions()) {
-                if (!toAdd.isEmpty()) {
-                    Iterator<String> iterator = toAdd.iterator();
-                    while (iterator.hasNext()) {
-                        String register = iterator.next();
-                        if (!activeMap.get(register).contains(block)) {
-                            activeEnd.put(register, line);
+            if (!toAdd.isEmpty()) {
+                Iterator<String> iterator = toAdd.iterator();
+                while (iterator.hasNext()) {
+                    String register = iterator.next();
+                    if (!activeMap.get(register).contains(block)) {
+                        HashSet<ObjBlock> set = activeMap.get(register);
+                        boolean flag = false;
+                        for (int j = blocks.indexOf(block); j < blocks.size(); j++) {
+                            if (set.contains(blocks.get(j))) {
+                                flag = true;
+                                break;
+                            }
                         }
-                        iterator.remove();
+                        if (!flag) {
+                            activeEnd.put(register, line);
+                            iterator.remove();
+                        }
                     }
                 }
+            }
+            for (ObjInstr instr : block.getInstructions()) {
                 if (instr instanceof ObjBranchInstr) {
                     Register rs = ((ObjBranchInstr) instr).getRs();
                     Register rt = ((ObjBranchInstr) instr).getRt();

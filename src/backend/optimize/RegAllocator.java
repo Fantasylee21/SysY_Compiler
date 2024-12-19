@@ -42,6 +42,7 @@ public class RegAllocator {
         for (int i = 0; i < 9; i++) {
             regMap.put("$t" + i, false);
         }
+        regMap.put("$fp", false);
     }
 
     public int getOffset(Register register) {
@@ -59,8 +60,10 @@ public class RegAllocator {
                 regMap.put(reg, true);
                 if (reg.charAt(1) == 's') {
                     return Register.get$s(Integer.parseInt(reg.substring(2)));
-                } else {
+                } else if (reg.charAt(1) == 't') {
                     return Register.get$t(Integer.parseInt(reg.substring(2)));
+                } else {
+                    return Register.get$fp();
                 }
             }
         }
@@ -70,8 +73,10 @@ public class RegAllocator {
     public Register getAllocReg(String reg) {
         if (reg.charAt(1) == 's') {
             return Register.get$s(Integer.parseInt(reg.substring(2)));
-        } else {
+        } else if (reg.charAt(1) == 't') {
             return Register.get$t(Integer.parseInt(reg.substring(2)));
+        } else {
+            return Register.get$fp();
         }
     }
 

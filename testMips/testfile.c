@@ -14,26 +14,20 @@ int getarray(int a[]){
     return n;
 }
 
-int getIndex(int arr[], int index) {
-    return arr[index];
+
+
+
+int main()
+{
+	int i;
+	int n;
+	int max = 0, maxn = 0;
+	n=2;
+	for (i = 0; i < n; i=i+1)
+	{
+		if (maxn < max)
+			maxn = max;
+	}
+	printf("%d", maxn);
+	return 0;
 }
-
-int setIndex(int arr[], int index, int val) {
-    int temp = arr[index];
-    arr[index] = val;
-    return temp;
-}
-
-int main() {
-    int arr1[5] = {0, 1, 2, 3, 4};
-    int arr2[5] = {0, 0, 0, 0, 0};
-    printf("%d\n", setIndex(arr2, 0, getIndex(arr1, 0) + 0));
-    printf("%d\n", setIndex(arr2, 1, getIndex(arr1, 1) + 1));
-    printf("%d\n", setIndex(arr2, 2, getIndex(arr1, 2) + 2));
-    printf("%d\n", setIndex(arr2, 3, getIndex(arr1, 3) + 3));
-    printf("%d\n", setIndex(arr2, 4, getIndex(arr1, 4) + 4));
-    return 0;
-}
-
-
-
