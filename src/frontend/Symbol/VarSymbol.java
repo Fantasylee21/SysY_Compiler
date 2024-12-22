@@ -17,8 +17,8 @@ public class VarSymbol extends Symbol {
         if (initial == null) {
             return name + " " +type.toString();
         }
-        return name + " " +type.toString() + " " + initial.toString();
-//        return name + " " +type.toString();
+//        return name + " " +type.toString() + " " + initial.toString();
+        return name + " " +type.toString();
     }
 
     public Value getLLVMValue() {

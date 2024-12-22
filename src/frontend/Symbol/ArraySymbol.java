@@ -31,8 +31,8 @@ public class ArraySymbol extends Symbol {
         if (initial == null) {
             return name + " " + type.toString() + "Array";
         }
-        return name + " " + type.toString() + "Array " + initial.toString();
-//        return name + " " + type.toString() + "Array";
+//        return name + " " + type.toString() + "Array " + initial.toString();
+        return name + " " + type.toString() + "Array";
     }
 
     public ArrayInitial getInitial() {

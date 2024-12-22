@@ -34,8 +34,8 @@ public class ConstVarSymbol extends Symbol {
         if (initial == null) {
             return name + " Const" + type.toString();
         }
-        return name + " Const" + type.toString() + " " + initial.toString();
-//        return name + " Const" + type.toString();
+//        return name + " Const" + type.toString() + " " + initial.toString();
+        return name + " Const" + type.toString();
     }
 
     @Override
