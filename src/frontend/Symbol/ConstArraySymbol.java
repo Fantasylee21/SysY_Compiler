@@ -43,8 +43,8 @@ public class ConstArraySymbol extends Symbol{
         if (initial == null) {
             return name + " Const" + type.toString() + "Array";
         }
-        return name + " Const" + type.toString() + "Array " + initial.toString();
-//        return name + " Const" + type.toString() + "Array";
+//        return name + " Const" + type.toString() + "Array " + initial.toString();
+        return name + " Const" + type.toString() + "Array";
     }
 
     @Override
