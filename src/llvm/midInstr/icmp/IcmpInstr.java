@@ -113,7 +113,12 @@ public class IcmpInstr extends MidInstr {
                         new ObjLiInstr(ans, 0);
                     }
                 } else if (constant1 != null) {
-                    new ObjRICalculate(RICalculateType.SLTI, ans, rt, constant1);
+                    if (constant1 < -32768 || constant1 > 32767) {
+                        new ObjRRCalculateInstr(RRCalculateType.SUBU, rt, Register.get$zero(), rt);
+                        new ObjRICalculate(RICalculateType.SGT, ans, rt, -constant1);
+                    } else {
+                        new ObjRICalculate(RICalculateType.SLTI, ans, rt, constant1);
+                    }
                 } else if (constant2 != null) {
                     new ObjRICalculate(RICalculateType.SGT, ans, rs, constant2);
                 } else {
@@ -145,7 +150,12 @@ public class IcmpInstr extends MidInstr {
                 } else if (constant1 != null) {
                     new ObjRICalculate(RICalculateType.SGT, ans, rt, constant1);
                 } else if (constant2 != null) {
-                    new ObjRICalculate(RICalculateType.SLTI, ans, rs, constant2);
+                    if (constant2 < -32768 || constant2 > 32767) {
+                        new ObjRRCalculateInstr(RRCalculateType.SUBU, rs, Register.get$zero(), rs);
+                        new ObjRICalculate(RICalculateType.SGT, ans, rs, -constant2);
+                    } else {
+                        new ObjRICalculate(RICalculateType.SLTI, ans, rs, constant2);
+                    }
                 } else {
                     new ObjRRCalculateInstr(RRCalculateType.SLT, ans, rs, rt);
                 }
