@@ -19,7 +19,7 @@ public class BackOptimize {
         PassHole passHole = new PassHole(objModule);
 
         regAllocator.allocReg();
-        removeBlockByJ.run();
+//        removeBlockByJ.run();
 //        combineBlock.run();
         passHole.run();
     }
