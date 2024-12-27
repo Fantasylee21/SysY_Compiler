@@ -155,6 +155,11 @@ public class VarDecl extends Node {
                         if (node.getChildren().get(node.getChildren().size() - 1) instanceof InitVal initVal) {
                             Value pointer = instr;
                             ArrayList<Value> values = initVal.generateIRList();
+
+                            for (int i = values.size(); i < arraySymbol.getSize(); i++) {
+                                values.add(new Constant(0));
+                            }
+
                             for (int i = 0; i < values.size(); i++)  {
                                 instr = new GetElementPtrInstr(LLVMBuilder.getLlvmBuilder().getVarName(), pointer, llvmType, new Constant(i));
                                 if (llvmType.getType() == LLVMEnumType.Int8Type) {
